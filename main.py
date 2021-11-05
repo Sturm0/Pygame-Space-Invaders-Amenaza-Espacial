@@ -16,7 +16,7 @@ resolución = (1280,720)
 ventana = pygame.display.set_mode(resolución) #,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED
 #Variables globales
 jej_temporal = True #ESTO ES PARA PRUEBAS ES RELEVANTE REMOVERLA LUEGO DE HABERLAS HECHO
-tiempo_muerte = 0
+
 listaEnemigo = []
 #explosion = pygame.image.load('./Imagenes/EXPLODE/EXPLODE_medio.png')
 explosion = []
@@ -44,6 +44,7 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.listadisparo = []
 		self.vidas = 3
 		self.vida = True
+		self.eliminado = False
 		self.velocidad = 5
 		self.puntaje = 0
 	# def movimientoDerecha(self):
@@ -84,8 +85,9 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.rect.centerx = resolución[0]/2
 		self.rect.centery = resolución[1]-50
 
-	def dibujar(self,superficie):
-		superficie.blit(self.ImagenNave,self.rect)
+	def dibujar(self,superficie,vida=True):
+		if vida:
+			superficie.blit(self.ImagenNave,self.rect)
 
 class Proyectil(pygame.sprite.Sprite):
 	def __init__(self,posx,posy, ruta, personaje):
@@ -279,7 +281,6 @@ def InvasionEspacial():
 	global jej_temporal
 	global niv
 	global listaEnemigo
-	global tiempo_muerte
 
 	def generar_asteroides(lista,resolución):
 		número = 0 #sirve para que no estén todos los asteroides en la misma línea
@@ -342,6 +343,7 @@ def InvasionEspacial():
 					if len(listaEnemigo) <= 1:
 						cargarEnemigos()
 						tiempo256 = pygame.time.get_ticks()/1000
+						jugador.eliminado = False
 						jugador.revivir()
 						if jej_temporal:
 							niv += 1
@@ -461,7 +463,6 @@ def InvasionEspacial():
 				if asteroide.rect.colliderect(jugador.rect):
 					jugador.destruccion()
 					listaAsteroides.remove(asteroide)
-					tiempo_muerte = time()
 					listaEnemigo = []
 					jej_temporal = False
 					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(120,100,40))
@@ -490,8 +491,10 @@ def InvasionEspacial():
 						x.trayectoria()
 						if x.rect.colliderect(jugador.rect):
 							jugador.destruccion()
+							jugador.eliminado = True
+							listaExplosiones.append((jugador.rect.left,jugador.rect.top,time())) #revisar porque no parece estar funcionando
+
 							enemigo.listadisparo.remove(x)
-							tiempo_muerte = time()
 							listaEnemigo = []
 							jej_temporal = False
 							TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(120,100,40))
@@ -543,7 +546,8 @@ def InvasionEspacial():
 							#explotar(asteroide.rect.left,asteroide.rect.top,time(),ventana)
 							listaExplosiones.append((asteroide.rect.left,asteroide.rect.top,time())) #pensar si crear una clase para las explosiones o no
 							sonidoExplosion.play()
-		
+		if not jugador.eliminado:
+			jugador.dibujar(ventana)
 
 		for each in listaExplosiones:
 			if (not time() > each[2]+2) and acumulador_explosion < len(explosion):
@@ -556,7 +560,7 @@ def InvasionEspacial():
 			
 		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
 		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
-		jugador.dibujar(ventana)
+		
 		
 
 		if enJuego == False:
