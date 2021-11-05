@@ -269,6 +269,12 @@ def cargarEnemigos():
 			if x == 9:
 				posx = 100
 
+# def explotar(x,y,tiempo_inicio,ventana):
+# 	#voy a utilizar esta función para mostrar explosiones en los asteroides, después incluso quizá suplante a la actual para los enemigos y la nave del jugador
+	
+# 	if not time() > tiempo_inicio+2:
+# 		ventana.blit(explosion[5], (x,y))
+
 def InvasionEspacial():
 	global jej_temporal
 	global niv
@@ -320,6 +326,8 @@ def InvasionEspacial():
 			listaEstrellas[cada_elemento].append([x_aleatorio,y_aleatorio])
 	tiempo256 = 0
 	listaAsteroides = []
+	listaExplosiones = []
+	acumulador_explosion = 0
 	while True:
 		
 		tiempo = (pygame.time.get_ticks()/1000)-tiempo256
@@ -444,7 +452,6 @@ def InvasionEspacial():
 		else:
 
 			#Acá se mueven los asteroides
-
 			for asteroide in listaAsteroides:
 				if asteroide.rect.top > resolución[1]:
 					listaAsteroides.remove(asteroide)
@@ -529,6 +536,23 @@ def InvasionEspacial():
 							jugador.puntaje += 100
 							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 							tiempo2 = time()
+
+					for asteroide in listaAsteroides:
+						if x.rect.colliderect(asteroide.rect):
+							listaAsteroides.remove(asteroide)
+							#explotar(asteroide.rect.left,asteroide.rect.top,time(),ventana)
+							listaExplosiones.append((asteroide.rect.left,asteroide.rect.top,time())) #pensar si crear una clase para las explosiones o no
+							sonidoExplosion.play()
+		
+
+		for each in listaExplosiones:
+			if (not time() > each[2]+2) and acumulador_explosion < len(explosion):
+				ventana.blit(explosion[acumulador_explosion], (each[0],each[1]))
+				print(acumulador_explosion)
+				acumulador_explosion +=1
+			else:
+				listaExplosiones.remove(each)
+				acumulador_explosion = 0
 			
 		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
 		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
