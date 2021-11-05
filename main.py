@@ -329,6 +329,7 @@ def InvasionEspacial():
 	listaAsteroides = []
 	listaExplosiones = []
 	acumulador_explosion = 0
+	TEMPORAL = True
 	while True:
 		
 		tiempo = (pygame.time.get_ticks()/1000)-tiempo256
@@ -465,7 +466,7 @@ def InvasionEspacial():
 					listaAsteroides.remove(asteroide)
 					listaEnemigo = []
 					jej_temporal = False
-					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(120,100,40))
+					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 					if jugador.vidas < 1:
 						print("entro acá")
 						enJuego = False
@@ -497,25 +498,35 @@ def InvasionEspacial():
 							enemigo.listadisparo.remove(x)
 							listaEnemigo = []
 							jej_temporal = False
-							TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(120,100,40))
+							TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 							if jugador.vidas < 1:
 								print("entro acá")
 								enJuego = False
 								detenerTodo()
 						if x.rect.top > resolución[1]:
 							enemigo.listadisparo.remove(x)
+			transparencia = 0
 				
 		else:
 			#print("Entro en este otro lugar")
 			tiempo_niv = time() #la hora cuando se muestra el cártel que indica que pasaste de nivel
 			
-			# if time() > tiempo_muerte+2:
-			# 	cargarEnemigos()
-			# 	jugador.revivir()
-			# 	niv += 1
 			TextoNivel = miFuenteNivel.render("Nivel: "+str(niv),0,(255,255,255))
 			TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
 			tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
+
+			if transparencia == 255:
+				TEMPORAL = False
+			if transparencia < 255 and TEMPORAL:
+				transparencia += 5
+			else:
+				transparencia -= 5
+				if transparencia < 0:
+					TEMPORAL = True
+			print(transparencia)
+			TextoNivel.set_alpha(transparencia)
+			TextoNivelB.set_alpha(transparencia)
+
 			ventana.blit(TextoNivel,((resolución[0]/2)-tamaño_texto[0]/2,(resolución[1]/2)-(tamaño_texto[1]/2)))
 			ventana.blit(TextoNivelB,((resolución[0]/2)-tamaño_texto[0]/2,(resolución[1]/2)-(tamaño_texto[1]/2)+50))
 			
@@ -552,7 +563,6 @@ def InvasionEspacial():
 		for each in listaExplosiones:
 			if (not time() > each[2]+2) and acumulador_explosion < len(explosion):
 				ventana.blit(explosion[acumulador_explosion], (each[0],each[1]))
-				print(acumulador_explosion)
 				acumulador_explosion +=1
 			else:
 				listaExplosiones.remove(each)
@@ -572,4 +582,5 @@ def InvasionEspacial():
 		pygame.display.update()
 		#print(f"{reloj.get_fps():.2f}")
 
+#TEMPORAL = True
 InvasionEspacial()
