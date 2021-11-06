@@ -23,12 +23,16 @@ explosion = []
 
 niv_objetivo = 0
 niv = 0
+#Carga de imagenes
 for each in ['./Imagenes/EXPLODE/EXPLODE%s.png'%x for x in range(1,21)]: #'./Imagenes/EXPLODE/EXPLODE_medio.png'ahora esta puesto ese None para que lo interprete como una lista, luego sera agregado cada frame de la explosión
 	print(each)
 	if each != None:
 		explosion.append(pygame.image.load(each).convert())
-
-
+listaPotenciadores = []
+for each in ['./Imagenes/Potenciadores/Potenciador%s.png'%x for x in range(0,1)]:
+	print(each)
+	if each != None:
+		listaPotenciadores.append(pygame.image.load(each).convert())
 
 class naveEspacial(pygame.sprite.Sprite):
 	#clase para las naves
@@ -228,26 +232,25 @@ class Asteroide(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.listaimagenes = []
 		self.posImagen = posImagen
-		
 		self.vida = True
-
 		for each in ['./Imagenes/Asteroides/ASTEROID%s.png'%x for x in range(0,5)]:
 			if each != None:
 				self.listaimagenes.append(pygame.image.load(each).convert())
-
 		self.rect = self.listaimagenes[self.posImagen].get_rect()
-		# self.posx = posx
-		# self.posy = posy
 		self.rect.left = posx
 		self.rect.top = posy
-	def destruir(self):
-		#poner la animación correspondiente
-		#destruirse 
-		pass
 
 	def dibujar(self,superficie):
 		#superficie.blit(self.listaimagenes[self.posImagen],(self.posx,self.posy))
 		superficie.blit(self.listaimagenes[self.posImagen],(self.rect.left,self.rect.top))
+
+class Potenciadores(pygame.sprite.Sprite):
+	def __init__(self,índice):
+		pygame.sprite.Sprite.__init__(self)
+		self.potenciador = listaPotenciadores[índice]
+		self.rect = self.potenciador.get_rect()
+	def dibujar(self,ventana):
+		ventana.blit(self.potenciador,self.rect)
 
 def detenerTodo(*args):
 	# if args == "Jugador pasa de nivel":
@@ -307,6 +310,7 @@ def InvasionEspacial():
 
 	#ImagenFondo = pygame.image.load('Imagenes/Fondo.jpg')
 	jugador = naveEspacial()
+	potenciador0 = Potenciadores(0)
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
@@ -570,7 +574,9 @@ def InvasionEspacial():
 			
 		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
 		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
-		
+		potenciador0.rect.left = resolución[0]/2
+		potenciador0.rect.top = resolución[1]/2
+		potenciador0.dibujar(ventana)
 		
 
 		if enJuego == False:
