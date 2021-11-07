@@ -18,18 +18,17 @@ ventana = pygame.display.set_mode(resolución) #,flags=pygame.FULLSCREEN|pygame.
 jej_temporal = True #ESTO ES PARA PRUEBAS ES RELEVANTE REMOVERLA LUEGO DE HABERLAS HECHO
 
 listaEnemigo = []
-#explosion = pygame.image.load('./Imagenes/EXPLODE/EXPLODE_medio.png')
 explosion = []
 
 niv_objetivo = 0
 niv = 0
 #Carga de imagenes
-for each in ['./Imagenes/EXPLODE/EXPLODE%s.png'%x for x in range(1,21)]: #'./Imagenes/EXPLODE/EXPLODE_medio.png'ahora esta puesto ese None para que lo interprete como una lista, luego sera agregado cada frame de la explosión
+for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
 	print(each)
 	if each != None:
 		explosion.append(pygame.image.load(each).convert())
 listaPotenciadores = []
-for each in ['./Imagenes/Potenciadores/Potenciador%s.png'%x for x in range(0,1)]:
+for each in ['./Imagenes/Potenciadores/Potenciador%s.PNG'%x for x in range(0,1)]:
 	print(each)
 	if each != None:
 		listaPotenciadores.append(pygame.image.load(each).convert())
@@ -233,7 +232,7 @@ class Asteroide(pygame.sprite.Sprite):
 		self.listaimagenes = []
 		self.posImagen = posImagen
 		self.vida = True
-		for each in ['./Imagenes/Asteroides/ASTEROID%s.png'%x for x in range(0,5)]:
+		for each in ['./Imagenes/Asteroides/ASTEROID%s.PNG'%x for x in range(0,5)]:
 			if each != None:
 				self.listaimagenes.append(pygame.image.load(each).convert())
 		self.rect = self.listaimagenes[self.posImagen].get_rect()
