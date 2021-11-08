@@ -66,10 +66,12 @@ class naveEspacial(pygame.sprite.Sprite):
 				self.rect.left = resolución[0]
 			if self.rect.top < resolución[1] - resolución[1]/2:
 				self.rect.top = resolución[1] - resolución[1]/2
-	def disparar(self,x,y):
-		miProyectil = Proyectil(x,y,"Imagenes/SHOTS.png",True)
+	def disparar(self,x,y,potenciador_valor):
+		if potenciador_valor == 0:
+			miProyectil = Proyectil(x,y,"Imagenes/SHOTS.png",True)
+		elif potenciador_valor == 1:
+			miProyectil = Proyectil(x,y,"Imagenes/SHOT_prueba.png",True)
 		self.listadisparo.append(miProyectil)
-
 	
 
 	def destruccion(self):
@@ -227,6 +229,7 @@ class Invasor(pygame.sprite.Sprite):
 		#listaEnemigo.remove(self)
 
 class Asteroide(pygame.sprite.Sprite):
+	velocidad = 5
 	def __init__(self,posImagen,posx,posy):
 		pygame.sprite.Sprite.__init__(self)
 		self.listaimagenes = []
@@ -244,13 +247,17 @@ class Asteroide(pygame.sprite.Sprite):
 		superficie.blit(self.listaimagenes[self.posImagen],(self.rect.left,self.rect.top))
 
 class Potenciadores(pygame.sprite.Sprite):
-	def __init__(self,índice):
+	def __init__(self,índice,x,y):
 		pygame.sprite.Sprite.__init__(self)
 		self.potenciador = listaPotenciadores[índice]
 		self.rect = self.potenciador.get_rect()
+		self.rect.left = x
+		self.rect.top = y
+		self.tipo = índice
 	def dibujar(self,ventana):
 		ventana.blit(self.potenciador,self.rect)
-
+	def mover(self):
+		self.rect.top += Asteroide.velocidad
 def detenerTodo(*args):
 	# if args == "Jugador pasa de nivel":
 	# 	niv = True 
@@ -260,6 +267,7 @@ def detenerTodo(*args):
 		enemigo.conquista = True
 	# return niv
 
+#se podría agregar un decorador cache a esta función para hacerla más rápida
 def cargarEnemigos():
 
 	lista_y = [20,120,220]
@@ -309,7 +317,6 @@ def InvasionEspacial():
 
 	#ImagenFondo = pygame.image.load('Imagenes/Fondo.jpg')
 	jugador = naveEspacial()
-	potenciador0 = Potenciadores(0)
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
@@ -333,6 +340,7 @@ def InvasionEspacial():
 	listaExplosiones = []
 	acumulador_explosion = 0
 	TEMPORAL = True
+	potenciador_valor = 0
 	while True:
 		
 		tiempo = (pygame.time.get_ticks()/1000)-tiempo256
@@ -346,6 +354,8 @@ def InvasionEspacial():
 				if event.key == pygame.K_RETURN:
 					if len(listaEnemigo) <= 1:
 						cargarEnemigos()
+						potenciador_valor = 0
+						#jugador.tipoDisparo = 0
 						tiempo256 = pygame.time.get_ticks()/1000
 						jugador.eliminado = False
 						jugador.revivir()
@@ -366,7 +376,7 @@ def InvasionEspacial():
 				jugador.rect.top -= jugador.velocidad
 				x,y = jugador.rect.center
 				if acumulador == 10:
-					jugador.disparar(x,y)
+					jugador.disparar(x,y,potenciador_valor)
 					
 					acumulador = 0
 				acumulador += 1
@@ -377,7 +387,7 @@ def InvasionEspacial():
 				jugador.rect.top -= jugador.velocidad
 				x,y = jugador.rect.center
 				if acumulador == 10:
-					jugador.disparar(x,y)
+					jugador.disparar(x,y,potenciador_valor)
 					
 					acumulador = 0
 				acumulador += 1
@@ -385,7 +395,7 @@ def InvasionEspacial():
 			elif keys[K_UP] and keys[K_SPACE]:
 				jugador.rect.top -= jugador.velocidad
 				x,y = jugador.rect.center
-				jugador.disparar(x,y)
+				jugador.disparar(x,y,potenciador_valor)
 				if acumulador == 10:
 					acumulador = 0
 				acumulador += 1
@@ -393,7 +403,7 @@ def InvasionEspacial():
 			elif keys[K_DOWN] and keys[K_SPACE]:
 				jugador.rect.top += jugador.velocidad
 				x,y = jugador.rect.center
-				jugador.disparar(x,y)
+				jugador.disparar(x,y,potenciador_valor)
 				if acumulador == 10:
 					acumulador = 0
 				acumulador += 1
@@ -402,7 +412,7 @@ def InvasionEspacial():
 				jugador.rect.left += jugador.velocidad
 				x,y = jugador.rect.center
 				if acumulador == 10:
-					jugador.disparar(x,y)
+					jugador.disparar(x,y,potenciador_valor)
 					
 					acumulador = 0
 				acumulador += 1
@@ -411,7 +421,7 @@ def InvasionEspacial():
 				jugador.rect.left -= jugador.velocidad
 				x,y = jugador.rect.center
 				if acumulador == 10:
-					jugador.disparar(x,y)
+					jugador.disparar(x,y,potenciador_valor)
 					
 					acumulador = 0
 				acumulador += 1
@@ -433,7 +443,7 @@ def InvasionEspacial():
 			elif keys[K_SPACE]:
 				x,y = jugador.rect.center
 				if acumulador == 10:
-					jugador.disparar(x,y)
+					jugador.disparar(x,y,potenciador_valor)
 					
 					acumulador = 0
 				acumulador += 1
@@ -462,7 +472,7 @@ def InvasionEspacial():
 				if asteroide.rect.top > resolución[1]:
 					listaAsteroides.remove(asteroide)
 				else:
-					asteroide.rect.top += 5
+					asteroide.rect.top += asteroide.velocidad
 					asteroide.dibujar(ventana)
 				if asteroide.rect.colliderect(jugador.rect):
 					jugador.destruccion()
@@ -526,7 +536,6 @@ def InvasionEspacial():
 				transparencia -= 5
 				if transparencia < 0:
 					TEMPORAL = True
-			print(transparencia)
 			TextoNivel.set_alpha(transparencia)
 			TextoNivelB.set_alpha(transparencia)
 
@@ -556,12 +565,22 @@ def InvasionEspacial():
 
 					for asteroide in listaAsteroides:
 						if x.rect.colliderect(asteroide.rect):
+							potenciador0 = Potenciadores(0,asteroide.rect.left,asteroide.rect.top)
 							listaAsteroides.remove(asteroide)
 							#explotar(asteroide.rect.left,asteroide.rect.top,time(),ventana)
 							listaExplosiones.append((asteroide.rect.left,asteroide.rect.top,time())) #pensar si crear una clase para las explosiones o no
 							sonidoExplosion.play()
 		if not jugador.eliminado:
 			jugador.dibujar(ventana)
+
+		if "potenciador0" in globals() or "potenciador0" in locals():
+			potenciador0.mover()
+			potenciador0.dibujar(ventana)
+			if potenciador0.rect.colliderect(jugador):
+				#jugador.tipoDisparo = 1
+				potenciador_valor = 1
+				del potenciador0
+
 
 		for each in listaExplosiones:
 			if (not time() > each[2]+2) and acumulador_explosion < len(explosion):
@@ -570,14 +589,11 @@ def InvasionEspacial():
 			else:
 				listaExplosiones.remove(each)
 				acumulador_explosion = 0
-			
-		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
-		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
-		potenciador0.rect.left = resolución[0]/2
-		potenciador0.rect.top = resolución[1]/2
-		potenciador0.dibujar(ventana)
 		
 
+		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
+		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
+		
 		if enJuego == False:
 			pygame.mixer.music.fadeout(3000) #se detiene en 3 segundos de forma paulatina
 			ventana.blit(gameover,(0,0))
