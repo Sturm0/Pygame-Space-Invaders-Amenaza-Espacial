@@ -70,9 +70,10 @@ class naveEspacial(pygame.sprite.Sprite):
 		if potenciador_valor == 0:
 			miProyectil = Proyectil(x,y,"Imagenes/SHOTS.png",True)
 		elif potenciador_valor == 1:
-			miProyectil = Proyectil(x,y,"Imagenes/SHOT_prueba.png",True)
+			miProyectil = Proyectil(x-8,y,"Imagenes/SHOTS2.png",True)
+			miProyectil2 = Proyectil(x+5,y,"Imagenes/SHOTS2.png",True)
+			self.listadisparo.append(miProyectil2)
 		self.listadisparo.append(miProyectil)
-	
 
 	def destruccion(self):
 		#self.sonidoExplosion.play()
@@ -99,11 +100,16 @@ class Proyectil(pygame.sprite.Sprite):
 		pygame.sprite.Sprite.__init__(self)
 		self.imageProyectil = pygame.image.load(ruta).convert() #"Imagenes/SHOTS.png"
 		self.rect = self.imageProyectil.get_rect()
-		self.velocidadDisparo = 5
 		self.rect.top = posy
 		self.rect.left = posx
-
+		# if potenciador_valor == 1:
+		# 	self.rect2 = self.imageProyectil.get_rect()
+		# 	self.rect2.top = posy
+		# 	self.rect2.left = posx+30
+		# 	self.rect.left = posx-8
+		self.velocidadDisparo = 5
 		self.disparoPersonaje = personaje
+
 	def trayectoria(self):
 		if self.disparoPersonaje == True:
 			self.rect.top = self.rect.top - self.velocidadDisparo
@@ -354,7 +360,8 @@ def InvasionEspacial():
 				if event.key == pygame.K_RETURN:
 					if len(listaEnemigo) <= 1:
 						cargarEnemigos()
-						potenciador_valor = 0
+						if jugador.eliminado:
+							potenciador_valor = 0
 						#jugador.tipoDisparo = 0
 						tiempo256 = pygame.time.get_ticks()/1000
 						jugador.eliminado = False
