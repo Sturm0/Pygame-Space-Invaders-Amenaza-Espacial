@@ -5,6 +5,8 @@ from random import randint,uniform,choice
 from os import system, name
 from random import randint
 from copy import deepcopy 
+from timeit import timeit
+from functools import lru_cache
 def limpiar_pantalla():
 	if name == "nt":
 		system('cls')
@@ -19,7 +21,7 @@ jej_temporal = True #ESTO ES PARA PRUEBAS ES RELEVANTE REMOVERLA LUEGO DE HABERL
 
 listaEnemigo = []
 explosion = []
-
+id_objetivo = None
 niv_objetivo = 0
 niv = 0
 #Carga de imagenes
@@ -81,7 +83,6 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.vidas -= 1
 		if self.vidas < 1:
 			self.Vida = False
-		#print(self.vidas)
 		self.velocidad = 0
 		self.ImagenNave = self.ImagenExplosion
 
@@ -145,9 +146,11 @@ class Invasor(pygame.sprite.Sprite):
 		self.vida = True 
 		self.limiteDerecha = posx + distancia
 		self.limiteIzquierda = posx #- distancia
+		self.seLanza = False
 		#self.sonidoExplosion = pygame.mixer.Sound('./Sonidos/EXPLODE.WAV')
 	def trayectoria(self):
-		self.rect.top = self.rect.top - self.velocidadDisparo
+		#self.rect.top = self.rect.top - self.velocidadDisparo
+		pass
 
 	def dibujar(self,superficie):
 		if self.vida == True:
@@ -160,37 +163,45 @@ class Invasor(pygame.sprite.Sprite):
 
 		superficie.blit(self.imagenInvasor,self.rect)
 
-	def comportamiento(self,tiempo,tiempo2):
+	def comportamiento(self,tiempo,tiempo2,seLanza,índiceLance,jugador,id_objetivo):
 		#algoritmo de comportamiento
+		self.seLanza = seLanza
 		if self.conquista == False and self.vida == True:
-			self.__movimientos()
+			if seLanza:
+				self.rect.top += 1
+				if self.rect.left > jugador.rect.left:
+					self.rect.left -= 1
+				else:
+					self.rect.left += 1
+
+				if self.rect.left > resolución[0] or self.rect.top > resolución[1]:
+					self.vida = False
+			else:
+				self.__movimientos()
+
 			self.__ataque()
-			#if self.tiempoCambio == tiempo or (self.tiempoCambio < tiempo+0.016 and self.tiempoCambio > tiempo+0.016):
-			#print(self.tiempoCambio,tiempo,round(tiempo))
+			
 			if self.tiempoCambio == round(tiempo):
-				#print("Entro"+str(randint(0,500)))
 				self.posImagen += 1
 				self.tiempoCambio += 1
-
 
 				if self.posImagen > len(self.listaimagenes)-1:
 					self.posImagen = 0
 		elif self.vida == False:
-			#Esto esta para que se pueda ver la explosión
+
 			if time() > tiempo2+0.5:
 				listaEnemigo.remove(self)
 				self.posImagen2 = 0
+				if seLanza and len(listaEnemigo) > 0:
+					índiceLance = randint(0,len(listaEnemigo)-1)
+					id_objetivo = id(listaEnemigo[índiceLance])
 			else:
 				if self.posImagen2 < len(self.ImagenExplosion)-1 and time() >= tiempo2+self.tiempoCambio2:
 					self.posImagen2 += 1
 					self.tiempoCambio2 += 0.025
-				#revisar esta porción de código
-				# if time() >= tiempo2+0.14:
-				# 	if self.posImagen2 < len(self.ImagenExplosion)-1:
-				# 		self.posImagen2 += 1
-				# 	tiempo2 += 0.14
-					
-		return tiempo2
+
+		return tiempo2, índiceLance, id_objetivo
+
 			
 	def __ataque(self):
 		número_random_temporal = randint(1,450)
@@ -274,8 +285,8 @@ def detenerTodo(*args):
 	# return niv
 
 #se podría agregar un decorador cache a esta función para hacerla más rápida
+#@lru_cache(maxsize=2)
 def cargarEnemigos():
-
 	lista_y = [20,120,220]
 	posx = 100
 	for cada_uno in lista_y:
@@ -286,6 +297,9 @@ def cargarEnemigos():
 			posx += 75
 			if x == 9:
 				posx = 100
+	índiceLance = randint(0,len(listaEnemigo)-1) #índice del enemigo que se va a lanzar a por el jugador
+	objetivo_cambio = True
+	return índiceLance, objetivo_cambio
 
 # def explotar(x,y,tiempo_inicio,ventana):
 # 	#voy a utilizar esta función para mostrar explosiones en los asteroides, después incluso quizá suplante a la actual para los enemigos y la nave del jugador
@@ -297,6 +311,7 @@ def InvasionEspacial():
 	global jej_temporal
 	global niv
 	global listaEnemigo
+	global id_objetivo
 
 	def generar_asteroides(lista,resolución):
 		número = 0 #sirve para que no estén todos los asteroides en la misma línea
@@ -326,8 +341,8 @@ def InvasionEspacial():
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
-	cargarEnemigos()
-
+	índiceLance = cargarEnemigos()[0]
+	#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 	enJuego = True
 	acumulador = 0
 	tiempo_niv = 0
@@ -341,12 +356,23 @@ def InvasionEspacial():
 			x_aleatorio = randint(0,resolución[0])
 			y_aleatorio = randint(0,resolución[1])
 			listaEstrellas[cada_elemento].append([x_aleatorio,y_aleatorio])
+
+	#Variables que son usadas en el while principal
 	tiempo256 = 0
 	listaAsteroides = []
 	listaExplosiones = []
 	acumulador_explosion = 0
 	TEMPORAL = True
 	potenciador_valor = 0
+	tiempo_lance = 5 #Es una variable que determina cada cuanto tiempo un ememigo va a dirigirse hacía el jugador
+	#acumulador_lance = 0 Acumulador de lance, representa el valor de X que debe tomar el enemigo cuando se lanza hacía el jugador
+	tiene_que_lanzarse = False #esta hace que un enemigo particular se mueva
+	tiene_que_lanzarse2 = False #esta habilita al siguiente enemigo a lanzarse
+	acumulador_fotograma = 0 #variable que almacena el número de fotograma
+	#índiceLance = randint(0,len(listaEnemigo)-1) #índice del enemigo que se va a lanzar a por el jugador
+	objetivo_cambio = True #determina si se cambio o no el objetivo de lance
+	id_objetivo = id(listaEnemigo[índiceLance])
+
 	while True:
 		
 		tiempo = (pygame.time.get_ticks()/1000)-tiempo256
@@ -359,13 +385,15 @@ def InvasionEspacial():
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_RETURN:
 					if len(listaEnemigo) <= 1:
-						cargarEnemigos()
+						índiceLance,objetivo_cambio = cargarEnemigos()
+						#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 						if jugador.eliminado:
 							potenciador_valor = 0
 						#jugador.tipoDisparo = 0
 						tiempo256 = pygame.time.get_ticks()/1000
 						jugador.eliminado = False
 						jugador.revivir()
+						tiempo_lance = tiempo+5
 						if jej_temporal:
 							niv += 1
 						else:
@@ -461,6 +489,7 @@ def InvasionEspacial():
 		#Esto forma parte del muestreo de estrellas
 		velocidades = (1,2,3)
 		for índice_main,elemento in enumerate(velocidades,0):
+
 			for índice, each in enumerate(listaEstrellas[índice_main],0):
 				if each[1] < resolución[1]:
 					listaEstrellas[índice_main][índice][1] += elemento
@@ -493,10 +522,26 @@ def InvasionEspacial():
 						detenerTodo()
 
 		if len(listaEnemigo) > 0:
+			
+			for índice,enemigo in enumerate(listaEnemigo,0):
+				# if not "enemigoLance" in locals():
+				# 	tiempo2 = enemigo.comportamiento(tiempo,tiempo2,False)
+				# else:
+				# 	if listaEnemigo[enemigoLance] == enemigo:
+				# 		tiempo2 = enemigo.comportamiento(tiempo,tiempo2,True)
+				# 	else:
+				# 		tiempo2 = enemigo.comportamiento(tiempo,tiempo2,False)
+				#print(índice, índiceLance)
+				if índice == índiceLance and objetivo_cambio:
+					id_objetivo = id(listaEnemigo[índice])
+					objetivo_cambio = False
 
-			for enemigo in listaEnemigo:
-
-				tiempo2 = enemigo.comportamiento(tiempo,tiempo2)
+				if id(enemigo) == id_objetivo:
+					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,True,índiceLance,jugador,id_objetivo)
+					#,tiene_que_lanzarse,tiene_que_lanzarse2,
+				else:
+					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,False,índiceLance,jugador,id_objetivo) #este último True False todavía no tiene asignado nada, pero va a usarse para determinar el enemigo que se tiene que lanzar
+					#,tiene_que_lanzarse,tiene_que_lanzarse2,
 				enemigo.dibujar(ventana)
 
 				if enemigo.rect.colliderect(jugador.rect):
@@ -564,6 +609,8 @@ def InvasionEspacial():
 						if x.rect.colliderect(enemigo.rect) and enemigo.vida:
 							
 							enemigo.vida = False
+							# if enemigo.seLanza:
+							# 	índiceLance = randint(0,len(listaEnemigo)-2)
 							jugador.listadisparo.remove(x)
 							sonidoExplosion.play()
 							jugador.puntaje += 100
@@ -601,14 +648,28 @@ def InvasionEspacial():
 		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
 		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
 		
+		#función lineal
+		def f(x1,y1,x2,y2,X):
+			try:
+				m = (y2 - y1)/(x2 - x1)
+			except ZeroDivisionError:
+				m = 1000
+			b = -m*x2+y2
+			return round(m*X+b)
+
+		
+
 		if enJuego == False:
 			pygame.mixer.music.fadeout(3000) #se detiene en 3 segundos de forma paulatina
 			ventana.blit(gameover,(0,0))
 			#ventana.blit(Texto,(resolución[0]/2,resolución[1]/2))
-
+		acumulador_fotograma += 1
 		reloj.tick(60)
 		pygame.display.update()
 		#print(f"{reloj.get_fps():.2f}")
 
 #TEMPORAL = True
 InvasionEspacial()
+
+#NOTAS:
+#parece haber un problema cuando le disparo al enemigo que se lanza
