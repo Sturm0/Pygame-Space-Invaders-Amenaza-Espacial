@@ -121,13 +121,19 @@ class Proyectil(pygame.sprite.Sprite):
 		superficie.blit(self.imageProyectil,self.rect)
 
 class Invasor(pygame.sprite.Sprite):
-	def __init__(self,posx,posy,distancia, ImagenUno, ImagenDos, ImagenTres):
+	def __init__(self,posx,posy,distancia, lista,tipo):
 		pygame.sprite.Sprite.__init__(self)
-		self.imagenA = pygame.image.load(ImagenUno)
-		self.imagenB = pygame.image.load(ImagenDos)
-		self.imagenC = pygame.image.load(ImagenTres)
+		
+		self.listaimagenes = [] 
+		for each in lista:
+			self.listaimagenes.append(pygame.image.load(each))
+
+		if tipo == 1:
+			self.imagen_disparo = "Imagenes/enemigos/ESHOT_1.png"	
+		else:
+			self.imagen_disparo = "Imagenes/enemigos/ESHOT_0.png"
+
 		self.ImagenExplosion = explosion
-		self.listaimagenes = [self.imagenA,self.imagenB,self.imagenC]
 		self.posImagen = 0
 		self.posImagen2 = 0
 		self.imagenInvasor = self.listaimagenes[self.posImagen]
@@ -147,7 +153,6 @@ class Invasor(pygame.sprite.Sprite):
 		self.limiteDerecha = posx + distancia
 		self.limiteIzquierda = posx #- distancia
 		self.seLanza = False
-		#self.sonidoExplosion = pygame.mixer.Sound('./Sonidos/EXPLODE.WAV')
 	def trayectoria(self):
 		#self.rect.top = self.rect.top - self.velocidadDisparo
 		pass
@@ -211,7 +216,7 @@ class Invasor(pygame.sprite.Sprite):
 			self.__disparo()
 	def __disparo(self):
 		x,y = self.rect.center
-		miProyectil = Proyectil(x,y,"Imagenes/enemigos/ESHOT_0.png", False)
+		miProyectil = Proyectil(x,y,self.imagen_disparo, False)
 		self.listadisparo.append(miProyectil)
 
 	def __movimientos(self):
@@ -288,17 +293,28 @@ def detenerTodo(*args):
 
 #se podría agregar un decorador cache a esta función para hacerla más rápida
 #@lru_cache(maxsize=2)
-def cargarEnemigos():
+def cargarEnemigos(tipo):
 	lista_y = [20,120,220]
 	posx = 100
-	for cada_uno in lista_y:
-		for x in range(1,10):
-			enemigo = Invasor(posx,cada_uno,200,"Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png")
-			#print(enemigo.tiempoCambio)
-			listaEnemigo.append(enemigo)
-			posx += 75
-			if x == 9:
-				posx = 100
+	if tipo == 0:
+		for cada_uno in lista_y:
+			for x in range(1,10):
+				enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0)
+				#print(enemigo.tiempoCambio)
+				listaEnemigo.append(enemigo)
+				posx += 75
+				if x == 9:
+					posx = 100
+	else:
+		for cada_uno in lista_y:
+			for x in range(1,10):
+				#enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY2_1.PNG","Imagenes/enemigos/ENEMY2_2.PNG","Imagenes/enemigos/ENEMY2_3.PNG","Imagenes/enemigos/ENEMY2_4.PNG"])
+				enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1)
+				listaEnemigo.append(enemigo)
+				posx += 75
+				if x == 9:
+					posx = 100
+
 	índiceLance = randint(0,len(listaEnemigo)-1) #índice del enemigo que se va a lanzar a por el jugador
 	objetivo_cambio = True
 	return índiceLance, objetivo_cambio
@@ -347,7 +363,7 @@ def InvasionEspacial():
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
-	índiceLance = cargarEnemigos()[0]
+	índiceLance = cargarEnemigos(0)[0]
 	#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 	enJuego = True
 	acumulador = 0
@@ -365,7 +381,7 @@ def InvasionEspacial():
 
 	#Variables que son usadas en el while principal
 	el_ast = 0 #asteroides eliminados,lleva el conteo de asteroides eliminados cuando el nivel es 2
-	camp_ast = 10 #campo de asteroides, determina en que nivel va a aparecer el campo de asteroides, VARIABLE TODAVÍA NO IMPLEMENTADA
+	camp_ast = 1 #campo de asteroides, determina en que nivel va a aparecer el campo de asteroides, VARIABLE TODAVÍA NO IMPLEMENTADA
 	gen_ast = True
 
 	tiempo256 = 0
@@ -394,7 +410,7 @@ def InvasionEspacial():
 				sys.exit()
 			elif event.type == pygame.KEYDOWN:
 				if event.key == pygame.K_RETURN:
-					if (len(listaEnemigo) <= 0 and niv != 10) or (niv == 10 and el_ast >= 20):
+					if (len(listaEnemigo) <= 0 and niv != camp_ast) or (niv == camp_ast and el_ast >= 20):
 
 						#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 						if jugador.eliminado:
@@ -409,8 +425,10 @@ def InvasionEspacial():
 						else:
 							jej_temporal = True
 
-						if niv != 10:
-							índiceLance,objetivo_cambio = cargarEnemigos()
+						if niv < camp_ast:
+							índiceLance,objetivo_cambio = cargarEnemigos(0)
+						elif niv > camp_ast:
+							índiceLance,objetivo_cambio = cargarEnemigos(1)
 
 		#Acá se configura la asignación de teclas
 		keys = pygame.key.get_pressed()
@@ -512,8 +530,8 @@ def InvasionEspacial():
 					listaEstrellas[índice_main][índice][1] = 0
 
 		#Acá se generan los asteroides
-		if len(listaAsteroides) == 0 or (niv == 10 and gen_ast):
-			if niv != 10:
+		if len(listaAsteroides) == 0 or (niv == camp_ast and gen_ast):
+			if niv != camp_ast:
 				listaAsteroides = generar_asteroides(listaAsteroides,resolución,3)
 			else:
 				listaAsteroides = generar_asteroides(listaAsteroides,resolución,70)
@@ -595,10 +613,10 @@ def InvasionEspacial():
 			transparencia = 0
 				
 		else:
-			if niv != 10 or (niv == 10 and el_ast >= 20): #ARREGLAR ESTO
+			if niv != camp_ast or (niv == camp_ast and el_ast >= 20): #ARREGLAR ESTO
 				#print("Entro en este otro lugar")
 				tiempo_niv = time() #la hora cuando se muestra el cártel que indica que pasaste de nivel
-				if not niv == 9:
+				if not niv == camp_ast-1:
 					TextoNivel = miFuenteNivel.render("Nivel: "+str(niv+1),0,(255,255,255))
 					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
 					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
@@ -659,7 +677,7 @@ def InvasionEspacial():
 							#explotar(asteroide.rect.left,asteroide.rect.top,time(),ventana)
 							listaExplosiones.append((asteroide.rect.left,asteroide.rect.top,time())) #pensar si crear una clase para las explosiones o no
 							sonidoExplosion.play()
-							if niv == 10:
+							if niv == camp_ast:
 								el_ast += 1
 		if not jugador.eliminado:
 			jugador.dibujar(ventana)
