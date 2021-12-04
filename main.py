@@ -4,9 +4,9 @@ from time import sleep, time
 from random import randint,uniform,choice
 from os import system, name
 from random import randint
-from copy import deepcopy 
-from timeit import timeit
-from functools import lru_cache
+#from copy import deepcopy 
+#from timeit import timeit
+#from functools import lru_cache después ver si podes integrar esto en la generación de enemigos
 
 #Actualmente hay dos sistemas de explosiones implementados, uno para los asteroides, nave nodriza, jugador y otro para los enemigos. Mejorar y usar el primero para todo
 def limpiar_pantalla():
@@ -19,12 +19,12 @@ pygame.init()
 resolución = (1280,720)
 ventana = pygame.display.set_mode(resolución) #,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED
 #Variables globales
-jej_temporal = True #ESTO ES PARA PRUEBAS ES RELEVANTE REMOVERLA LUEGO DE HABERLAS HECHO
+jej_temporal = True #Cambiarle el nombre para que se entienda que hace
 
 listaEnemigo = []
 explosion = []
 id_objetivo = None
-#niv_objetivo = 0
+
 niv = 2
 #Carga de imagenes
 for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
@@ -242,11 +242,15 @@ class Nave_nodriza(Invasor):
 	def __init__(self,posx,posy,distancia, lista,tipo):
 		super().__init__(posx,posy,distancia,lista,tipo)
 		#self.vida = None #vida no es usado para nada en nave nodriza porque usa el segundo sistema de explosiones
-		self.limiteDerecha = resolución[0]- self.listaimagenes[0].get_size()[0]
+		self.limiteDerecha = resolución[0] - self.listaimagenes[0].get_size()[0]
 		print(self.listaimagenes[0].get_size()[0])
 		self.limiteIzquierda = 0
 		self.cant_vids = 10
-	def comportamiento(self, tiempo,tiempo2):
+		self.tiempo_rayo_comienzo = 1 #todavía no implementado, la idea es que tire el rayo cada 2 segundos y tenga una duración de 1 segundo
+		self.laser = pygame.Rect(0,0,0,0)
+		self.tiempo_rayo = 0
+		self.proyectiles = []
+	def comportamiento(self, tiempo,tiempo2, ventana):
 		#intentar achicar la funcionalidad de comportamiento de invasor para que pueda ser aprovechada acá más fácilmente
 		#self.__movimientos()  
 		#self.__movimientoLateral() <- intentar implementar esto bien
@@ -267,7 +271,46 @@ class Nave_nodriza(Invasor):
 			if self.posImagen > len(self.listaimagenes)-1:
 				self.posImagen = 0
 
+		if self.tiempo_rayo_comienzo == round(tiempo):
+			self.tiempo_rayo_comienzo += 3
+			self.tiempo_rayo = round(tiempo)
+
+			for each in range(3):
+				self.proyectiles.append(pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],30,30))
+
+		if tiempo > self.tiempo_rayo and tiempo < self.tiempo_rayo+1:
+			self.__disparo(ventana)
+
+		try:
+			#print("entro acá".upper())
+			if self.proyectiles[0].top < resolución[1]:
+				self.proyectiles[0].top += 5
+
+			if self.proyectiles[1].top < resolución[1]:
+				self.proyectiles[1].top += 5
+				self.proyectiles[1].left -= 2
+
+			if self.proyectiles[2].top < resolución[1]:
+				self.proyectiles[2].top += 5
+				self.proyectiles[2].left += 2
+
+			for each in self.proyectiles:
+				pygame.draw.rect(ventana,(135,206,235),each)
+
+				if each.top > resolución[1]:
+					self.proyectiles.remove(each)
+		except:
+			pass
+
 		return tiempo2
+
+	def __ataque(self,ventana):
+		pass
+
+	def __disparo(self,ventana):
+		self.laser = pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],8, resolución[1])
+		pygame.draw.rect(ventana,(135,206,235),self.laser)
+		#return tiempo2
 		
 class Asteroide(pygame.sprite.Sprite):
 	velocidad = 5
@@ -594,7 +637,21 @@ def InvasionEspacial():
 
 		if "nave_nodriza0" in locals() or "nave_nodriza0" in globals():
 			nave_nodriza0.dibujar(ventana)
-			tiempo2 = nave_nodriza0.comportamiento(tiempo,tiempo2)
+			tiempo2 = nave_nodriza0.comportamiento(tiempo,tiempo2,ventana)
+			if nave_nodriza0.laser.colliderect(jugador.rect):
+
+				del nave_nodriza0
+				jugador.destruccion()
+				jugador.eliminado = True
+				listaExplosiones.append((jugador.rect.left,jugador.rect.top,time()))
+				listaEnemigo = []
+				jej_temporal = False
+				TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
+				if jugador.vidas < 1:
+					print("entro acá")
+					enJuego = False
+					detenerTodo()
+
 
 		if len(listaEnemigo) > 0:
 			
@@ -652,7 +709,7 @@ def InvasionEspacial():
 			transparencia = 0
 				
 		else:
-			if (niv != camp_ast or el_ast >= 20 or jugador.eliminado) and niv != niv_nod:
+			if (niv != camp_ast or el_ast >= 20 or jugador.eliminado) and (niv != niv_nod or ("nave_nodriza0" not in locals() and "nave_nodriza0" not in globals())):
 				tiempo_niv = time() #la hora cuando se muestra el cártel que indica que pasaste de nivel
 				if (niv == camp_ast-1 and not jugador.eliminado) or (niv == camp_ast and jugador.eliminado): #revisar jej_temporal y jugador.eliminado que puede ser lo que estás buscando
 					TextoNivel = miFuenteNivel.render("campo de ASTEROIDES",0,(255,255,255))
