@@ -246,10 +246,12 @@ class Nave_nodriza(Invasor):
 		print(self.listaimagenes[0].get_size()[0])
 		self.limiteIzquierda = 0
 		self.cant_vids = 10
-		self.tiempo_rayo_comienzo = 1 #todavía no implementado, la idea es que tire el rayo cada 2 segundos y tenga una duración de 1 segundo
+		self.tiempo_rayo_comienzo = 1
 		self.laser = pygame.Rect(0,0,0,0)
 		self.tiempo_rayo = 0
 		self.proyectiles = []
+		self.img_orb = pygame.image.load('./Imagenes/enemigos/ORB_0.PNG').convert()
+
 	def comportamiento(self, tiempo,tiempo2, ventana):
 		#intentar achicar la funcionalidad de comportamiento de invasor para que pueda ser aprovechada acá más fácilmente
 		#self.__movimientos()  
@@ -276,29 +278,31 @@ class Nave_nodriza(Invasor):
 			self.tiempo_rayo = round(tiempo)
 
 			for each in range(3):
-				self.proyectiles.append(pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],30,30))
+				self.proyectiles.append(self.img_orb.get_rect(topleft=(self.rect.midbottom[0],self.rect.midbottom[1])))
+				
 
 		if tiempo > self.tiempo_rayo and tiempo < self.tiempo_rayo+1:
 			self.__disparo(ventana)
 
 		try:
-			#print("entro acá".upper())
 			if self.proyectiles[0].top < resolución[1]:
 				self.proyectiles[0].top += 5
 
 			if self.proyectiles[1].top < resolución[1]:
 				self.proyectiles[1].top += 5
-				self.proyectiles[1].left -= 2
+				self.proyectiles[1].left -= 4
 
 			if self.proyectiles[2].top < resolución[1]:
 				self.proyectiles[2].top += 5
-				self.proyectiles[2].left += 2
+				self.proyectiles[2].left += 4
 
 			for each in self.proyectiles:
-				pygame.draw.rect(ventana,(135,206,235),each)
+				ventana.blit(self.img_orb,each)
 
 				if each.top > resolución[1]:
-					self.proyectiles.remove(each)
+					
+					self.proyectiles = []
+
 		except:
 			pass
 
