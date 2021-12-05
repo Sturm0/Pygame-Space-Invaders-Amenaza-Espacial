@@ -4,7 +4,6 @@ from time import sleep, time
 from random import randint,uniform,choice
 from os import system, name
 from random import randint
-#from copy import deepcopy 
 #from timeit import timeit
 #from functools import lru_cache después ver si podes integrar esto en la generación de enemigos
 
@@ -17,7 +16,7 @@ def limpiar_pantalla():
 limpiar_pantalla()
 pygame.init()
 resolución = (1280,720)
-ventana = pygame.display.set_mode(resolución) #,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED
+ventana = pygame.display.set_mode(resolución,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED) #,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED
 #Variables globales
 jej_temporal = True #Cambiarle el nombre para que se entienda que hace
 
@@ -25,7 +24,7 @@ listaEnemigo = []
 explosion = []
 id_objetivo = None
 
-niv = 2
+niv = 1
 #Carga de imagenes
 for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
 	print(each)
@@ -42,7 +41,6 @@ class naveEspacial(pygame.sprite.Sprite):
 	def __init__(self):
 		pygame.sprite.Sprite.__init__(self)
 		self.ImagenNave = pygame.image.load('./Imagenes/SHIP.png').convert()
-		#self.ImagenExplosion = pygame.image.load('./Imagenes/EXPLODE/EXPLODE_medio.png')
 		self.ImagenExplosion = explosion[0]
 		#self.sonidoExplosion = pygame.mixer.Sound()
 		self.rect = self.ImagenNave.get_rect()
@@ -54,13 +52,6 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.eliminado = False
 		self.velocidad = 5
 		self.puntaje = 0
-	# def movimientoDerecha(self):
-	# 	self.rect.right += self.velocidad
-	# 	self.__movimiento()
-
-	# def movimientoIzquierda(self):
-	# 	self.rect.left -= self.velocidad
-	# 	self.__movimiento()
 
 	def movimiento(self):
 		if self.vida == True:
@@ -444,7 +435,7 @@ def InvasionEspacial():
 
 	#Variables que son usadas en el while principal
 	el_ast = 0 #asteroides eliminados,lleva el conteo de asteroides eliminados cuando el nivel es 2
-	camp_ast = 1 #campo de asteroides, determina en que nivel va a aparecer el campo de asteroides
+	camp_ast = 2 #campo de asteroides, determina en que nivel va a aparecer el campo de asteroides
 	gen_ast = True
 	niv_nod = camp_ast+2 #nivel en el que aparece la nave nodriza
 
@@ -464,6 +455,22 @@ def InvasionEspacial():
 	objetivo_cambio = True #determina si se cambio o no el objetivo de lance
 	id_objetivo = id(listaEnemigo[índiceLance])
 
+
+	#función para la muerte del jugador cuando lo mata la nave nodriza, la idea es después mejorarla para que incluya cualquier tipo de muerte del jugador
+	def morir_nod(nave_nodriza0,jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego):
+		#del nave_nodriza0 #por alguna razón no se puede eliminar nave_nodriza0 desde acá, ni idea
+		jugador.destruccion()
+		jugador.eliminado = True
+		listaExplosiones.append((jugador.rect.left,jugador.rect.top,time()))
+		listaEnemigo = []
+		jej_temporal = False
+		TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
+		if jugador.vidas < 1:
+			print("entro acá")
+			enJuego = False
+			detenerTodo()
+		return listaEnemigo, jej_temporal, TextoVidas, enJuego
+		
 	while True:
 		
 		tiempo = (pygame.time.get_ticks()/1000)-tiempo256
@@ -587,7 +594,6 @@ def InvasionEspacial():
 				acumulador += 1
 			
 		ventana.fill((0,0,0))
-		#pygame.draw.rect(ventana, (255,0,0), (resolución[0]/2,resolución[1]/2,4,4))
 
 		#Esto forma parte del muestreo de estrellas
 		velocidades = (1,2,3)
@@ -639,22 +645,18 @@ def InvasionEspacial():
 						enJuego = False
 						detenerTodo()
 
+
+
 		if "nave_nodriza0" in locals() or "nave_nodriza0" in globals():
 			nave_nodriza0.dibujar(ventana)
 			tiempo2 = nave_nodriza0.comportamiento(tiempo,tiempo2,ventana)
 			if nave_nodriza0.laser.colliderect(jugador.rect):
-
+				listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_nod(nave_nodriza0,jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego)
 				del nave_nodriza0
-				jugador.destruccion()
-				jugador.eliminado = True
-				listaExplosiones.append((jugador.rect.left,jugador.rect.top,time()))
-				listaEnemigo = []
-				jej_temporal = False
-				TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
-				if jugador.vidas < 1:
-					print("entro acá")
-					enJuego = False
-					detenerTodo()
+			else:
+				if jugador.rect.collidelist(nave_nodriza0.proyectiles) > -1:
+					listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_nod(nave_nodriza0,jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego)
+					del nave_nodriza0
 
 
 		if len(listaEnemigo) > 0:
@@ -715,8 +717,18 @@ def InvasionEspacial():
 		else:
 			if (niv != camp_ast or el_ast >= 20 or jugador.eliminado) and (niv != niv_nod or ("nave_nodriza0" not in locals() and "nave_nodriza0" not in globals())):
 				tiempo_niv = time() #la hora cuando se muestra el cártel que indica que pasaste de nivel
-				if (niv == camp_ast-1 and not jugador.eliminado) or (niv == camp_ast and jugador.eliminado): #revisar jej_temporal y jugador.eliminado que puede ser lo que estás buscando
+				if (niv == camp_ast-1 and not jugador.eliminado) or (niv == camp_ast and jugador.eliminado):
 					TextoNivel = miFuenteNivel.render("campo de ASTEROIDES",0,(255,255,255))
+					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
+					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
+
+				elif (niv == niv_nod-1 and not jugador.eliminado) or (niv == niv_nod and jugador.eliminado):
+					TextoNivel = miFuenteNivel.render("NAVE NODRIZA",0,(255,255,255))
+					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
+					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
+
+				elif not jugador.eliminado:
+					TextoNivel = miFuenteNivel.render("Nivel: "+str(niv+1),0,(255,255,255))
 					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
 					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
 				else:
@@ -812,13 +824,6 @@ def InvasionEspacial():
 				lista_potenciadores.remove(each)
 				
 
-		# if "potenciador0" in globals() or "potenciador0" in locals():
-		# 	potenciador0.mover()
-		# 	potenciador0.dibujar(ventana)
-		# 	if potenciador0.rect.colliderect(jugador):
-		# 		potenciador_valor = 1
-		# 		del potenciador0
-
 		for each in listaExplosiones:
 			if (not time() > each[2]+2) and acumulador_explosion < len(explosion):
 				ventana.blit(explosion[acumulador_explosion], (each[0],each[1]))
@@ -831,15 +836,6 @@ def InvasionEspacial():
 		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
 		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
 		
-		#función lineal
-		# def f(x1,y1,x2,y2,X):
-		# 	try:
-		# 		m = (y2 - y1)/(x2 - x1)
-		# 	except ZeroDivisionError:
-		# 		m = 1000
-		# 	b = -m*x2+y2
-		# 	return round(m*X+b)
-
 		if enJuego == False:
 			pygame.mixer.music.fadeout(3000) #se detiene en 3 segundos de forma paulatina
 			ventana.blit(gameover,(0,0))
@@ -855,7 +851,7 @@ def InvasionEspacial():
 		
 		acumulador_fotograma += 1
 		reloj.tick(60)
-
+		print(niv)
 		pygame.display.update()
 		#print(f"{reloj.get_fps():.2f}")
 
