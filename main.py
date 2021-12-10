@@ -13,12 +13,19 @@ def limpiar_pantalla():
 	else:
 		system('clear')
 limpiar_pantalla()
-pygame.init()
 resolución = (1280,720)
-ventana = pygame.display.set_mode(resolución) #,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED
+with open("Configuraciones.txt",'r') as archivo:
+	for each in archivo:
+		if each[0] != "#":
+			if eval(each.split("=")[1]):
+				ventana = pygame.display.set_mode(resolución,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED)
+			else:
+				ventana = pygame.display.set_mode(resolución)	
+pygame.init()
+
+#ventana = pygame.display.set_mode(resolución) #,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED
 #Variables globales
 jej_temporal = True #Cambiarle el nombre para que se entienda que hace
-
 listaEnemigo = []
 explosion = []
 id_objetivo = None
@@ -26,12 +33,10 @@ id_objetivo = None
 niv = 1
 #Carga de imagenes
 for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
-	print(each)
 	if each != None:
 		explosion.append(pygame.image.load(each).convert())
 listaPotenciadores = [] #imagenes de todos los potenciadores, CAMBIAR EL NOMBRE PARA QUE NO SE CONFUNDA CON lista_potenciadores
 for each in ['./Imagenes/Potenciadores/Potenciador_%s.PNG'%x for x in range(0,3)]:
-	print(each)
 	if each != None:
 		listaPotenciadores.append(pygame.image.load(each).convert())
 
