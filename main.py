@@ -162,7 +162,7 @@ class Invasor(pygame.sprite.Sprite):
 
 		superficie.blit(self.imagenInvasor,self.rect)
 
-	def comportamiento(self,tiempo,tiempo2,seLanza,índiceLance,jugador,id_objetivo):
+	def comportamiento(self,tiempo,tiempo2,seLanza,índiceLance,jugador,id_objetivo,listaExplosiones):
 		#algoritmo de comportamiento
 		if self.conquista == False and self.vida == True:
 			if seLanza:
@@ -187,17 +187,19 @@ class Invasor(pygame.sprite.Sprite):
 				if self.posImagen > len(self.listaimagenes)-1:
 					self.posImagen = 0
 		elif self.vida == False:
-
+			#TENGO QUE IMPLEMENTAR ESTA LÓGICA EN EL OTRO SISTEMA DE EXPLOSIONES Y UTILIZAR ESE PARA TODO
 			if time() > tiempo2+0.5:
 				listaEnemigo.remove(self)
-				self.posImagen2 = 0
+				#self.posImagen2 = 0
+				
 				if seLanza and len(listaEnemigo) > 0:
 					índiceLance = randint(0,len(listaEnemigo)-1)
 					id_objetivo = id(listaEnemigo[índiceLance])
 			else:
-				if self.posImagen2 < len(self.ImagenExplosion)-1 and time() >= tiempo2+self.tiempoCambio2:
-					self.posImagen2 += 1
-					self.tiempoCambio2 += 0.025
+				pass
+				# if self.posImagen2 < len(self.ImagenExplosion)-1 and time() >= tiempo2+self.tiempoCambio2:
+				# 	self.posImagen2 += 1
+				# 	self.tiempoCambio2 += 0.025
 
 		return tiempo2, índiceLance, id_objetivo
 
@@ -481,12 +483,10 @@ def InvasionEspacial():
 						#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 						if jugador.eliminado:
 							potenciador_valor = -1
-						#jugador.tipoDisparo = 0
 						tiempo256 = pygame.time.get_ticks()/1000
 						jugador.eliminado = False
 						jugador.revivir()
 						tiempo_lance = tiempo+5
-						#niv += 1
 						if jej_temporal: #jej_temporal parece evitar que pase de nivel cuando el jugador es eliminado
 							niv += 1
 						else:
@@ -662,9 +662,9 @@ def InvasionEspacial():
 					objetivo_cambio = False
 
 				if id(enemigo) == id_objetivo:
-					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,True,índiceLance,jugador,id_objetivo)
+					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,True,índiceLance,jugador,id_objetivo,listaExplosiones)
 				else:
-					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,False,índiceLance,jugador,id_objetivo)
+					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,False,índiceLance,jugador,id_objetivo,listaExplosiones)
 					
 				enemigo.dibujar(ventana)
 
@@ -757,7 +757,10 @@ def InvasionEspacial():
 					for enemigo in listaEnemigo:
 						if x.rect.colliderect(enemigo.rect) and enemigo.vida:
 							enemigo.vida = False
+
 							jugador.listadisparo.remove(x)
+							listaExplosiones.append((enemigo.rect.left,enemigo.rect.top,time()))
+							del enemigo
 							sonidoExplosion.play()
 							jugador.puntaje += 100
 							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
@@ -823,11 +826,13 @@ def InvasionEspacial():
 					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 				lista_potenciadores.remove(each)
 				
-
+		tiempo_cambio_temp = 0.025
 		for each in listaExplosiones:
-			if (not time() > each[2]+2) and acumulador_explosion < len(explosion):
+			if acumulador_explosion < len(explosion):
 				ventana.blit(explosion[acumulador_explosion], (each[0],each[1]))
-				acumulador_explosion +=1
+				if time() >= each[2]+tiempo_cambio_temp:
+					acumulador_explosion +=1
+					tiempo_cambio_temp += 0.025
 			else:
 				listaExplosiones.remove(each)
 				acumulador_explosion = 0
