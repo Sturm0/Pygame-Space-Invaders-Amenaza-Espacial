@@ -30,7 +30,7 @@ listaEnemigo = []
 explosion = []
 id_objetivo = None
 
-niv = 1
+niv = 9
 #Carga de imagenes
 for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
 	if each != None:
@@ -131,9 +131,9 @@ class Invasor(pygame.sprite.Sprite):
 		else:
 			self.imagen_disparo = "Imagenes/enemigos/ESHOT_0.png"
 
-		self.ImagenExplosion = explosion
+		#self.ImagenExplosion = explosion
 		self.posImagen = 0
-		self.posImagen2 = 0
+		#self.posImagen2 = 0
 		self.imagenInvasor = self.listaimagenes[self.posImagen]
 		self.rect = self.imagenInvasor.get_rect()
 		self.listadisparo = []
@@ -142,29 +142,29 @@ class Invasor(pygame.sprite.Sprite):
 		self.rect.left = posx
 		self.rangoDisparo = 1 #Determina la probabilidad de disparo
 		self.tiempoCambio = 3
-		self.tiempoCambio2 = 0.025 #todavía no hago nada con esto
+		#self.tiempoCambio2 = 0.025
 		self.conquista = False
 		self.derecha = True
 		self.contador = 0
 		self.Maxdescenso = self.rect.top + 40
-		self.vida = True 
+		#self.vida = True 
 		self.limiteDerecha = posx + distancia
 		self.limiteIzquierda = posx #- distancia
 		self.seLanza = False
 
 	def dibujar(self,superficie):
-		if self.vida == True:
-			self.imagenInvasor = self.listaimagenes[self.posImagen]
-		else:
-			#acá se muestra la explosión del invasor
-			self.imagenInvasor = self.ImagenExplosion[self.posImagen2]
-			
+		# if self.vida == True:
+		# 	self.imagenInvasor = self.listaimagenes[self.posImagen]
+		# else:
+		# 	pass
+		self.imagenInvasor = self.listaimagenes[self.posImagen]
 
 		superficie.blit(self.imagenInvasor,self.rect)
 
 	def comportamiento(self,tiempo,tiempo2,seLanza,índiceLance,jugador,id_objetivo,listaExplosiones):
 		#algoritmo de comportamiento
-		if self.conquista == False and self.vida == True:
+		self.seLanza = seLanza
+		if self.conquista == False: # and self.vida == True
 			if seLanza:
 				self.rect.top += 1
 				if self.rect.left > jugador.rect.left:
@@ -173,7 +173,6 @@ class Invasor(pygame.sprite.Sprite):
 					self.rect.left += 1
 
 				if self.rect.left > resolución[0] or self.rect.top > resolución[1]:
-					#self.vida = False
 					self.rect.top = 0
 			else:
 				self.__movimientos()
@@ -186,20 +185,6 @@ class Invasor(pygame.sprite.Sprite):
 
 				if self.posImagen > len(self.listaimagenes)-1:
 					self.posImagen = 0
-		elif self.vida == False:
-			#TENGO QUE IMPLEMENTAR ESTA LÓGICA EN EL OTRO SISTEMA DE EXPLOSIONES Y UTILIZAR ESE PARA TODO
-			if time() > tiempo2+0.5:
-				listaEnemigo.remove(self)
-				#self.posImagen2 = 0
-				
-				if seLanza and len(listaEnemigo) > 0:
-					índiceLance = randint(0,len(listaEnemigo)-1)
-					id_objetivo = id(listaEnemigo[índiceLance])
-			else:
-				pass
-				# if self.posImagen2 < len(self.ImagenExplosion)-1 and time() >= tiempo2+self.tiempoCambio2:
-				# 	self.posImagen2 += 1
-				# 	self.tiempoCambio2 += 0.025
 
 		return tiempo2, índiceLance, id_objetivo
 
@@ -229,11 +214,10 @@ class Invasor(pygame.sprite.Sprite):
 class Nave_nodriza(Invasor):
 	def __init__(self,posx,posy,distancia, lista,tipo):
 		super().__init__(posx,posy,distancia,lista,tipo)
-		#self.vida = None #vida no es usado para nada en nave nodriza porque usa el segundo sistema de explosiones
 		self.limiteDerecha = resolución[0] - self.listaimagenes[0].get_size()[0]
 		print(self.listaimagenes[0].get_size()[0])
 		self.limiteIzquierda = 0
-		self.cant_vids = 40
+		self.cant_vids = 10
 		self.tiempo_rayo_comienzo = 1
 		self.laser = pygame.Rect(0,0,0,0)
 		self.tiempo_rayo = 0
@@ -302,7 +286,6 @@ class Nave_nodriza(Invasor):
 	def __disparo(self,ventana):
 		self.laser = pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],8, resolución[1])
 		pygame.draw.rect(ventana,(135,206,235),self.laser)
-		#return tiempo2
 		
 class Asteroide(pygame.sprite.Sprite):
 	velocidad = 5
@@ -458,7 +441,7 @@ def InvasionEspacial():
 		#del nave_nodriza0 #por alguna razón no se puede eliminar nave_nodriza0 desde acá, ni idea
 		jugador.destruccion()
 		jugador.eliminado = True
-		listaExplosiones.append((jugador.rect.left,jugador.rect.top,time()))
+		listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0])
 		listaEnemigo = []
 		jej_temporal = False
 		TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
@@ -497,9 +480,7 @@ def InvasionEspacial():
 
 						elif niv == niv_nod:
 							nave_nodriza0 = Nave_nodriza(resolución[0]/2,20,7000,["./Imagenes/enemigos/BOSS_%s.png"%x for x in range(0,3)],2) #el 7000 no debería tener ningún efecto
-
-							print(nave_nodriza0.limiteDerecha)
-							print(nave_nodriza0.limiteIzquierda)
+							
 
 						elif niv > camp_ast:
 							índiceLance,objetivo_cambio = cargarEnemigos(1)
@@ -629,13 +610,12 @@ def InvasionEspacial():
 					listaAsteroides.remove(asteroide)
 					jugador.destruccion()
 					jugador.eliminado = True
-					listaExplosiones.append((jugador.rect.left,jugador.rect.top,time()))
+					listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0])
 					listaEnemigo = []
 					jej_temporal = False
 					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 					el_ast = 0 
 					if jugador.vidas < 1:
-						print("entro acá")
 						enJuego = False
 						detenerTodo()
 
@@ -662,24 +642,22 @@ def InvasionEspacial():
 					objetivo_cambio = False
 
 				if id(enemigo) == id_objetivo:
-					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,True,índiceLance,jugador,id_objetivo,listaExplosiones)
+					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,True,índiceLance,jugador,id_objetivo,listaExplosiones) 
 				else:
 					tiempo2,índiceLance,id_objetivo = enemigo.comportamiento(tiempo,tiempo2,False,índiceLance,jugador,id_objetivo,listaExplosiones)
 					
 				enemigo.dibujar(ventana)
 
 				if enemigo.rect.colliderect(jugador.rect):
-					print("entro acá")
 					#Y A SU VEZ ESTA ES IGUAL A OTRA MÁS ABAJO, JEJ
 					listaEnemigo.remove(enemigo)
 					jugador.destruccion()
 					jugador.eliminado = True
-					listaExplosiones.append((jugador.rect.left,jugador.rect.top,time()))
+					listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0])
 					listaEnemigo = []
 					jej_temporal = False
 					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 					if jugador.vidas < 1:
-						print("entro acá")
 						enJuego = False
 						detenerTodo()
 
@@ -694,14 +672,13 @@ def InvasionEspacial():
 							#LA LÍNEA 589 HACE REFERENCIA A LO QUE VIENE A CONTINUACIÓN:
 							jugador.destruccion()
 							jugador.eliminado = True
-							listaExplosiones.append((jugador.rect.left,jugador.rect.top,time())) #revisar porque no parece estar funcionando
+							listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0]) #revisar porque no parece estar funcionando
 
 							enemigo.listadisparo.remove(x)
 							listaEnemigo = []
 							jej_temporal = False
 							TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 							if jugador.vidas < 1:
-								print("entro acá")
 								enJuego = False
 								detenerTodo()
 						if x.rect.top > resolución[1]:
@@ -751,20 +728,22 @@ def InvasionEspacial():
 				x.dibujar(ventana)
 				x.trayectoria()
 
-				if x.rect.top < 0: #para que se elimnen las balas cuando no están en la ventana
+				if x.rect.top < 0: #para que se eliminen las balas cuando no están en la ventana
 					jugador.listadisparo.remove(x)
 				else:
 					for enemigo in listaEnemigo:
-						if x.rect.colliderect(enemigo.rect) and enemigo.vida:
-							enemigo.vida = False
-
+						if x.rect.colliderect(enemigo.rect):
 							jugador.listadisparo.remove(x)
-							listaExplosiones.append((enemigo.rect.left,enemigo.rect.top,time()))
-							del enemigo
+							listaExplosiones.append([enemigo.rect.left,enemigo.rect.top,time(),0])
+							listaEnemigo.remove(enemigo)
 							sonidoExplosion.play()
 							jugador.puntaje += 100
 							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 							tiempo2 = time()
+
+							if enemigo.seLanza and len(listaEnemigo) > 0:
+								índiceLance = randint(0,len(listaEnemigo)-1)
+								id_objetivo = id(listaEnemigo[índiceLance])
 
 					for asteroide in listaAsteroides:
 						if x.rect.colliderect(asteroide.rect):
@@ -783,7 +762,7 @@ def InvasionEspacial():
 								jugador.listadisparo.remove(x)
 							except:
 								pass
-							listaExplosiones.append((asteroide.rect.left,asteroide.rect.top,time()))
+							listaExplosiones.append([asteroide.rect.left,asteroide.rect.top,time(),0])
 							sonidoExplosion.play()
 							if niv == camp_ast:
 								el_ast += 1
@@ -795,19 +774,19 @@ def InvasionEspacial():
 							#es muy similar a lo de la línea 675, separar en una función
 							#nave_nodriza0.vida = False
 
-							listaExplosiones.append((x.rect.left,x.rect.top,time()))
+							listaExplosiones.append([x.rect.left,x.rect.top,time(),0])
 							jugador.listadisparo.remove(x)
 							sonidoExplosion.play()
 							
 							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 							tiempo2 = time()
 							nave_nodriza0.cant_vids -= 1
-							print(nave_nodriza0.cant_vids)
+							#print(nave_nodriza0.cant_vids)
 
 							if nave_nodriza0.cant_vids <= 0:
 								
 								jugador.puntaje += 1000
-								listaExplosiones.append((nave_nodriza0.rect.left,nave_nodriza0.rect.top,time()))
+								listaExplosiones.append([nave_nodriza0.rect.left,nave_nodriza0.rect.top,time(),0])
 								del nave_nodriza0
 									
 		if not jugador.eliminado:
@@ -828,14 +807,13 @@ def InvasionEspacial():
 				
 		tiempo_cambio_temp = 0.025
 		for each in listaExplosiones:
-			if acumulador_explosion < len(explosion):
-				ventana.blit(explosion[acumulador_explosion], (each[0],each[1]))
+			if each[3] < len(explosion)-1:
+				ventana.blit(explosion[each[3]], (each[0],each[1]))
 				if time() >= each[2]+tiempo_cambio_temp:
-					acumulador_explosion +=1
+					each[3] = each[3]+1 # each[3] es el índice de frame de la explosión
 					tiempo_cambio_temp += 0.025
 			else:
 				listaExplosiones.remove(each)
-				acumulador_explosion = 0
 		
 
 		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
