@@ -30,7 +30,7 @@ listaEnemigo = []
 explosion = []
 id_objetivo = None
 
-niv = 9
+niv = 1
 #Carga de imagenes
 for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
 	if each != None:
@@ -124,12 +124,15 @@ class Invasor(pygame.sprite.Sprite):
 		
 		self.listaimagenes = [pygame.image.load(each).convert() for each in lista] 
 
+		if tipo == 0:
+			self.imagen_disparo = "Imagenes/enemigos/ESHOT_0.png"
+			self.rangoDisparo = 1 #Determina la probabilidad de disparo
 		if tipo == 1:
 			self.imagen_disparo = "Imagenes/enemigos/ESHOT_1.png"
+			self.rangoDisparo = 2
 		elif tipo == 2:
-			pass
-		else:
-			self.imagen_disparo = "Imagenes/enemigos/ESHOT_0.png"
+			self.imagen_disparo = "Imagenes/enemigos/ESHOT_2.png"
+			self.rangoDisparo = 3
 
 		#self.ImagenExplosion = explosion
 		self.posImagen = 0
@@ -140,7 +143,7 @@ class Invasor(pygame.sprite.Sprite):
 		self.velocidad = 2
 		self.rect.top = posy
 		self.rect.left = posx
-		self.rangoDisparo = 1 #Determina la probabilidad de disparo
+		
 		self.tiempoCambio = 3
 		#self.tiempoCambio2 = 0.025
 		self.conquista = False
@@ -190,8 +193,8 @@ class Invasor(pygame.sprite.Sprite):
 
 			
 	def __ataque(self):
-		número_random_temporal = randint(1,450)
-		if número_random_temporal == self.rangoDisparo:
+		#número_random_temporal = randint(1,450)
+		if randint(1,450) <= self.rangoDisparo:
 			self.__disparo()
 	def __disparo(self):
 		x,y = self.rect.center
@@ -340,10 +343,18 @@ def cargarEnemigos(tipo):
 				posx += 75
 				if x == 9:
 					posx = 100
-	else:
+	elif tipo == 1:
 		for cada_uno in lista_y:
 			for x in range(1,10):
 				enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1)
+				listaEnemigo.append(enemigo)
+				posx += 75
+				if x == 9:
+					posx = 100
+	else:
+		for cada_uno in lista_y:
+			for x in range(1,10):
+				enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)],2)
 				listaEnemigo.append(enemigo)
 				posx += 75
 				if x == 9:
@@ -482,8 +493,11 @@ def InvasionEspacial():
 							nave_nodriza0 = Nave_nodriza(resolución[0]/2,20,7000,["./Imagenes/enemigos/BOSS_%s.png"%x for x in range(0,3)],2) #el 7000 no debería tener ningún efecto
 							
 
-						elif niv > camp_ast:
+						elif niv > camp_ast and niv < niv_nod+2:
 							índiceLance,objetivo_cambio = cargarEnemigos(1)
+
+						elif niv >= niv_nod+2:
+							índiceLance,objetivo_cambio = cargarEnemigos(2)
 						
 
 		#Acá se configura la asignación de teclas
