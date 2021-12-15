@@ -22,7 +22,7 @@ with open("Configuraciones.txt",'r') as archivo:
 			else:
 				ventana = pygame.display.set_mode(resolución)	
 pygame.init()
-
+pygame.display.set_caption("Space Invaders Amenaza Espacial")
 #ventana = pygame.display.set_mode(resolución) #,flags=pygame.FULLSCREEN|pygame.HWSURFACE|pygame.DOUBLEBUF|pygame.SCALED
 #Variables globales
 jej_temporal = True #Cambiarle el nombre para que se entienda que hace
@@ -30,8 +30,18 @@ listaEnemigo = []
 explosion = []
 id_objetivo = None
 
-niv = 1
+niv = 0
 #Carga de imagenes
+logo = pygame.image.load("./Imagenes/LOGO.png").convert()
+size_logo = logo.get_size()
+logo = pygame.transform.scale(logo,(size_logo[0]*2,size_logo[1]*2))
+vent_rect = ventana.get_rect()
+logo_rect = logo.get_rect()
+logo_rect.center = vent_rect.center
+
+
+
+
 for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
 	if each != None:
 		explosion.append(pygame.image.load(each).convert())
@@ -408,7 +418,7 @@ def InvasionEspacial():
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
-	índiceLance = cargarEnemigos(0)[0]
+	#índiceLance = cargarEnemigos(0)[0]
 	#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 	enJuego = True
 	acumulador = 0
@@ -444,7 +454,7 @@ def InvasionEspacial():
 	acumulador_fotograma = 0 #variable que almacena el número de fotograma
 	#índiceLance = randint(0,len(listaEnemigo)-1) #índice del enemigo que se va a lanzar a por el jugador
 	objetivo_cambio = True #determina si se cambio o no el objetivo de lance
-	id_objetivo = id(listaEnemigo[índiceLance])
+	#id_objetivo = id(listaEnemigo[índiceLance])
 
 
 	#función para la muerte del jugador cuando lo mata la nave nodriza, la idea es después mejorarla para que incluya cualquier tipo de muerte del jugador
@@ -498,7 +508,8 @@ def InvasionEspacial():
 
 						elif niv >= niv_nod+2:
 							índiceLance,objetivo_cambio = cargarEnemigos(2)
-						
+					elif niv == 0:
+						índiceLance = cargarEnemigos(0)[0]						
 
 		#Acá se configura la asignación de teclas
 		keys = pygame.key.get_pressed()
@@ -617,7 +628,8 @@ def InvasionEspacial():
 						listaAsteroides.append(Asteroide(x,-y))
 				else:
 					asteroide.rect.top += asteroide.velocidad
-					asteroide.dibujar(ventana)
+					if asteroide.rect.top > 0:
+						asteroide.dibujar(ventana)
 				if asteroide.rect.colliderect(jugador.rect) and not jugador.eliminado:
 					
 					#ESTA SECCIÓN DE ACÁ ES IGUAL A UNA MÁS ABAJO
@@ -647,7 +659,7 @@ def InvasionEspacial():
 					del nave_nodriza0
 
 
-		if len(listaEnemigo) > 0:
+		if len(listaEnemigo) > 0 and niv != 0:
 			
 			for índice,enemigo in enumerate(listaEnemigo,0):
 
@@ -699,27 +711,31 @@ def InvasionEspacial():
 							enemigo.listadisparo.remove(x)
 			transparencia = 0
 				
-		else:
+		elif niv != 0:
 			if (niv != camp_ast or el_ast >= 20 or jugador.eliminado) and (niv != niv_nod or ("nave_nodriza0" not in locals() and "nave_nodriza0" not in globals())):
 				tiempo_niv = time() #la hora cuando se muestra el cártel que indica que pasaste de nivel
 				if (niv == camp_ast-1 and not jugador.eliminado) or (niv == camp_ast and jugador.eliminado):
 					TextoNivel = miFuenteNivel.render("campo de ASTEROIDES",0,(255,255,255))
 					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
 					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
+					jugador.rect.left += resolución[0]+1000
 
 				elif (niv == niv_nod-1 and not jugador.eliminado) or (niv == niv_nod and jugador.eliminado):
 					TextoNivel = miFuenteNivel.render("NAVE NODRIZA",0,(255,255,255))
 					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
 					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
+					jugador.rect.left += resolución[0]+1000
 
 				elif not jugador.eliminado:
 					TextoNivel = miFuenteNivel.render("Nivel: "+str(niv+1),0,(255,255,255))
 					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
 					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
+					jugador.rect.left += resolución[0]+1000
 				else:
 					TextoNivel = miFuenteNivel.render("Nivel: "+str(niv),0,(255,255,255))
 					TextoNivelB = miFuenteNivel.render("pulsa INTRO para seguir",0,(255,255,255))
 					tamaño_texto = miFuenteNivel.size("pulsa INTRO para seguir")
+					jugador.rect.left += resolución[0]+1000
 
 				if transparencia == 255:
 					TEMPORAL = False
@@ -780,8 +796,8 @@ def InvasionEspacial():
 							sonidoExplosion.play()
 							if niv == camp_ast:
 								el_ast += 1
-								if el_ast >= 20:
-									jugador.rect.left += resolución[0]+1000
+								# if el_ast >= 20:
+								# 	jugador.rect.left += resolución[0]+1000
 
 					if niv == niv_nod and ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()):
 						if x.rect.colliderect(nave_nodriza0):
@@ -795,7 +811,6 @@ def InvasionEspacial():
 							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 							tiempo2 = time()
 							nave_nodriza0.cant_vids -= 1
-							#print(nave_nodriza0.cant_vids)
 
 							if nave_nodriza0.cant_vids <= 0:
 								
@@ -803,7 +818,7 @@ def InvasionEspacial():
 								listaExplosiones.append([nave_nodriza0.rect.left,nave_nodriza0.rect.top,time(),0])
 								del nave_nodriza0
 									
-		if not jugador.eliminado:
+		if not jugador.eliminado and jugador.rect.left < resolución[0]:
 			jugador.dibujar(ventana)
 
 		for each in lista_potenciadores:
@@ -838,17 +853,22 @@ def InvasionEspacial():
 			ventana.blit(gameover,(0,0))
 
 		if acumulador_fotograma % 2 == 0:
+			#print(f"{reloj.get_fps():.2f}")
 			if not not not sonido.get_num_channels(): #not not not es más rápido que "not bool()"
 				if musc_index < len(música)-1:
 					musc_index += 1
 				else:
 					musc_index = 0
+
 				sonido = pygame.mixer.Sound(música[musc_index])
 				sonido.play()
+
+		if niv == 0:
+			ventana.blit(logo,(logo_rect))
+			jugador.rect.left = resolución[0]+700
+
 		acumulador_fotograma += 1
 		reloj.tick(60)
 		pygame.display.update()
-		#print(f"{reloj.get_fps():.2f}")
-
 
 InvasionEspacial()
