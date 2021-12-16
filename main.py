@@ -13,7 +13,7 @@ def limpiar_pantalla():
 	else:
 		system('clear')
 limpiar_pantalla()
-resolución = (1280,720)
+resolución =  (1280,720)
 with open("Configuraciones.txt",'r') as archivo:
 	for each in archivo:
 		if each[0] != "#":
@@ -71,11 +71,13 @@ class naveEspacial(pygame.sprite.Sprite):
 		if self.vida == True:
 			if self.rect.left <= 0:
 				self.rect.left = 0
-			elif self.rect.left >= resolución[0]:
+			#elif self.rect.left >= resolución[0]:
 				#self.rect.left = resolución[0]
-				pass
+				#pass
 			if self.rect.top < resolución[1] - resolución[1]/2:
 				self.rect.top = resolución[1] - resolución[1]/2
+			elif self.rect.top > resolución[1]:
+				self.rect.top = resolución[1]
 	def disparar(self,x,y,potenciador_valor):
 		if potenciador_valor == -1:
 			miProyectil = Proyectil(x,y,"Imagenes/SHOTS.png",True)
@@ -144,9 +146,7 @@ class Invasor(pygame.sprite.Sprite):
 			self.imagen_disparo = "Imagenes/enemigos/ESHOT_2.png"
 			self.rangoDisparo = 3
 
-		#self.ImagenExplosion = explosion
-		self.posImagen = 0
-		#self.posImagen2 = 0
+		self.posImagen = 0	
 		self.imagenInvasor = self.listaimagenes[self.posImagen]
 		self.rect = self.imagenInvasor.get_rect()
 		self.listadisparo = []
@@ -155,14 +155,12 @@ class Invasor(pygame.sprite.Sprite):
 		self.rect.left = posx
 		
 		self.tiempoCambio = 3
-		#self.tiempoCambio2 = 0.025
 		self.conquista = False
 		self.derecha = True
 		self.contador = 0
 		self.Maxdescenso = self.rect.top + 40
-		#self.vida = True 
 		self.limiteDerecha = posx + distancia
-		self.limiteIzquierda = posx #- distancia
+		self.limiteIzquierda = posx
 		self.seLanza = False
 
 	def dibujar(self,superficie):
@@ -344,31 +342,33 @@ def detenerTodo(*args):
 #@lru_cache(maxsize=2)
 def cargarEnemigos(tipo):
 	lista_y = [20,120,220]
-	posx = 100
+	posx = 0
+	#todas esta sección debería estar ligada a la resolución o van a surgir problemas al cambiarse la resolución
 	if tipo == 0:
 		for cada_uno in lista_y:
 			for x in range(1,10):
-				enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0)
+				#													|-mejorar esto-|
+				enemigo = Invasor(posx,cada_uno,resolución[0]-((resolución[0]*(3/4))/9)*8-32,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0)				
 				listaEnemigo.append(enemigo)
-				posx += 75
+				posx += (resolución[0]*(3/4))/9
 				if x == 9:
-					posx = 100
+					posx = 0
 	elif tipo == 1:
 		for cada_uno in lista_y:
 			for x in range(1,10):
-				enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1)
+				enemigo = Invasor(posx,cada_uno,128,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1)
 				listaEnemigo.append(enemigo)
-				posx += 75
+				posx += resolución[0]/10
 				if x == 9:
-					posx = 100
+					posx = 0
 	else:
 		for cada_uno in lista_y:
 			for x in range(1,10):
-				enemigo = Invasor(posx,cada_uno,200,["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)],2)
+				enemigo = Invasor(posx,cada_uno,128,["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)],2)
 				listaEnemigo.append(enemigo)
-				posx += 75
+				posx += resolución[0]/10
 				if x == 9:
-					posx = 100
+					posx = 0
 
 	índiceLance = randint(0,len(listaEnemigo)-1) #índice del enemigo que se va a lanzar a por el jugador
 	objetivo_cambio = True
@@ -454,6 +454,7 @@ def InvasionEspacial():
 	acumulador_fotograma = 0 #variable que almacena el número de fotograma
 	#índiceLance = randint(0,len(listaEnemigo)-1) #índice del enemigo que se va a lanzar a por el jugador
 	objetivo_cambio = True #determina si se cambio o no el objetivo de lance
+	prob_poten = 40 #determina la probabilidad de que aparezca un potenciador
 	#id_objetivo = id(listaEnemigo[índiceLance])
 
 
@@ -509,8 +510,10 @@ def InvasionEspacial():
 						elif niv >= niv_nod+2:
 							índiceLance,objetivo_cambio = cargarEnemigos(2)
 					elif niv == 0:
-						índiceLance = cargarEnemigos(0)[0]						
-
+						índiceLance = cargarEnemigos(0)[0]
+				elif event.key == pygame.K_ESCAPE:						
+					pygame.quit()
+					sys.exit()
 		#Acá se configura la asignación de teclas
 		keys = pygame.key.get_pressed()
 
@@ -648,6 +651,8 @@ def InvasionEspacial():
 
 
 		if "nave_nodriza0" in locals() or "nave_nodriza0" in globals():
+			print("Local","nave_nodriza0" in locals())
+			print("Global","nave_nodriza0" in globals())
 			nave_nodriza0.dibujar(ventana)
 			tiempo2 = nave_nodriza0.comportamiento(tiempo,tiempo2,ventana)
 			if nave_nodriza0.laser.colliderect(jugador.rect):
@@ -777,13 +782,18 @@ def InvasionEspacial():
 
 					for asteroide in listaAsteroides:
 						if x.rect.colliderect(asteroide.rect):
-							if randint(0,100) <= 40: 
+							if niv == camp_ast:
+								prob_poten = 20 # es para que no aparezcan demasiados potenciadores en el nivel del campo de asteroides
+							else:
+								prob_poten = 40
+
+							print(prob_poten)
+							if randint(0,100) <= prob_poten:
 								lista_potenciadores.append(Potenciadores(0,asteroide.rect.left,asteroide.rect.top))
-							elif randint(0,100) <= 30:
+
+							elif randint(0,100) <= prob_poten-10:
 								lista_potenciadores.append(Potenciadores(1,asteroide.rect.left,asteroide.rect.top))
-							elif randint(0,100) <= 20:
-								lista_potenciadores.append(Potenciadores(1,asteroide.rect.left,asteroide.rect.top))
-							elif randint(0,100) <= 18:
+							elif randint(0,100) <= prob_poten-20:
 								lista_potenciadores.append(Potenciadores(2,asteroide.rect.left,asteroide.rect.top))
 								
 							listaAsteroides.remove(asteroide)
@@ -818,7 +828,7 @@ def InvasionEspacial():
 								listaExplosiones.append([nave_nodriza0.rect.left,nave_nodriza0.rect.top,time(),0])
 								del nave_nodriza0
 									
-		if not jugador.eliminado and jugador.rect.left < resolución[0]:
+		if not jugador.eliminado and jugador.rect.left < resolución[0]: #jugador.rect.top < resolucion[1]
 			jugador.dibujar(ventana)
 
 		for each in lista_potenciadores:
