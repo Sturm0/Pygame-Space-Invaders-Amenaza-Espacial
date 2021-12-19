@@ -346,16 +346,16 @@ def cargarEnemigos(tipo):
 	#todas esta sección debería estar ligada a la resolución o van a surgir problemas al cambiarse la resolución
 	if tipo == 0:
 		for cada_uno in lista_y:
-			for x in range(1,10):
+			for x in range(1,11):
 				#													|-mejorar esto-|
-				enemigo = Invasor(posx,cada_uno,resolución[0]-((resolución[0]*(3/4))/9)*8-32,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0)				
+				enemigo = Invasor(posx,cada_uno,resolución[0]-((resolución[0]*(1/2))/9)*8-32,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0)				
 				listaEnemigo.append(enemigo)
-				posx += (resolución[0]*(3/4))/9
+				posx += (resolución[0]*(1/2))/9
 				if x == 9:
 					posx = 0
 	elif tipo == 1:
 		for cada_uno in lista_y:
-			for x in range(1,10):
+			for x in range(1,11):
 				enemigo = Invasor(posx,cada_uno,128,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1)
 				listaEnemigo.append(enemigo)
 				posx += resolución[0]/10
@@ -363,7 +363,7 @@ def cargarEnemigos(tipo):
 					posx = 0
 	else:
 		for cada_uno in lista_y:
-			for x in range(1,10):
+			for x in range(1,11):
 				enemigo = Invasor(posx,cada_uno,128,["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)],2)
 				listaEnemigo.append(enemigo)
 				posx += resolución[0]/10
@@ -786,8 +786,6 @@ def InvasionEspacial():
 								prob_poten = 20 # es para que no aparezcan demasiados potenciadores en el nivel del campo de asteroides
 							else:
 								prob_poten = 40
-
-							print(prob_poten)
 							if randint(0,100) <= prob_poten:
 								lista_potenciadores.append(Potenciadores(0,asteroide.rect.left,asteroide.rect.top))
 
