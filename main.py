@@ -67,6 +67,9 @@ def detenerTodo(*args):
 
 #se podría agregar un decorador cache a esta función para hacerla más rápida
 #@lru_cache(maxsize=2)
+#							|-mejorar esto-|
+posición_limite = resolución[0]-((resolución[0]*(1/2))/9)*8-32
+valor_aum = (resolución[0]*(1/2))/9
 def cargarEnemigos(tipo):
 	lista_y = [20,120,220]
 	posx = 0
@@ -74,26 +77,25 @@ def cargarEnemigos(tipo):
 	if tipo == 0:
 		for cada_uno in lista_y:
 			for x in range(1,11):
-				#													|-mejorar esto-|
-				enemigo = Invasor(posx,cada_uno,resolución[0]-((resolución[0]*(1/2))/9)*8-32,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0,resolución)				
+				enemigo = Invasor(posx,cada_uno,posición_limite,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0,resolución)				
 				listaEnemigo.append(enemigo)
-				posx += (resolución[0]*(1/2))/9
+				posx += valor_aum
 				if x == 9:
 					posx = 0
 	elif tipo == 1:
 		for cada_uno in lista_y:
 			for x in range(1,11):
-				enemigo = Invasor(posx,cada_uno,128,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1,resolución)
+				enemigo = Invasor(posx,cada_uno,posición_limite,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1,resolución)
 				listaEnemigo.append(enemigo)
-				posx += resolución[0]/10
+				posx += valor_aum #resolución[0]/10
 				if x == 9:
 					posx = 0
 	else:
 		for cada_uno in lista_y:
 			for x in range(1,11):
-				enemigo = Invasor(posx,cada_uno,128,["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)],2,resolución)
+				enemigo = Invasor(posx,cada_uno,posición_limite,["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)],2,resolución)
 				listaEnemigo.append(enemigo)
-				posx += resolución[0]/10
+				posx += valor_aum #resolución[0]/10
 				if x == 9:
 					posx = 0
 
@@ -371,8 +373,6 @@ def InvasionEspacial():
 
 
 		if "nave_nodriza0" in locals() or "nave_nodriza0" in globals():
-			print("Local","nave_nodriza0" in locals())
-			print("Global","nave_nodriza0" in globals())
 			nave_nodriza0.dibujar(ventana)
 			tiempo2 = nave_nodriza0.comportamiento(tiempo,tiempo2,ventana)
 			if nave_nodriza0.laser.colliderect(jugador.rect):
