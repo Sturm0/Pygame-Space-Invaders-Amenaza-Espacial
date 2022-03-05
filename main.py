@@ -488,7 +488,10 @@ def InvasionEspacial():
 				else:
 					for enemigo in listaEnemigo:
 						if x.rect.colliderect(enemigo.rect):
-							jugador.listadisparo.remove(x)
+							try:
+								jugador.listadisparo.remove(x) #esto parece estar dando un error de vez en cuando, hasta que descubra a que se debe este try/except debería alcanzar
+							except:
+								pass
 							listaExplosiones.append([enemigo.rect.left,enemigo.rect.top,time(),0])
 							listaEnemigo.remove(enemigo)
 							sonidoExplosion.play()
@@ -524,13 +527,10 @@ def InvasionEspacial():
 							sonidoExplosion.play()
 							if niv == camp_ast:
 								el_ast += 1
-								# if el_ast >= 20:
-								# 	jugador.rect.left += resolución[0]+1000
 
 					if niv == niv_nod and ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()):
 						if x.rect.colliderect(nave_nodriza0):
 							#es muy similar a lo de la línea 675, separar en una función
-							#nave_nodriza0.vida = False
 
 							listaExplosiones.append([x.rect.left,x.rect.top,time(),0])
 							jugador.listadisparo.remove(x)
