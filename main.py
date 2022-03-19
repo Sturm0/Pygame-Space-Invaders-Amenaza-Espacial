@@ -57,13 +57,10 @@ for each in ['./Imagenes/Potenciadores/Potenciador_%s.PNG'%x for x in range(0,3)
 
 
 def detenerTodo(*args):
-	# if args == "Jugador pasa de nivel":
-	# 	niv = True 
 	for enemigo in listaEnemigo:
 		for disparo in enemigo.listadisparo:
 			enemigo.listadisparo.remove(disparo)
 		enemigo.conquista = True
-	# return niv
 
 #se podría agregar un decorador cache a esta función para hacerla más rápida
 #@lru_cache(maxsize=2)
@@ -136,12 +133,10 @@ def InvasionEspacial():
 	miFuenteNivel = pygame.font.Font(None,50)
 	Texto = miFuenteFin.render("Fin del juego",0,(120,100,40))
 
-	#ImagenFondo = pygame.image.load('Imagenes/Fondo.jpg')
 	jugador = naveEspacial(explosion,resolución)
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
-	#índiceLance = cargarEnemigos(0)[0]
 	#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 	enJuego = True
 	acumulador = 0
@@ -181,8 +176,9 @@ def InvasionEspacial():
 
 
 	#función para la muerte del jugador cuando lo mata la nave nodriza, la idea es después mejorarla para que incluya cualquier tipo de muerte del jugador
-	def morir_nod(nave_nodriza0,jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego):
+	def morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,listaAsteroides=None,asteroide=None,nave_nodriza0=False):
 		#del nave_nodriza0 #por alguna razón no se puede eliminar nave_nodriza0 desde acá, ni idea
+	
 		jugador.destruccion()
 		jugador.eliminado = True
 		listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0])
@@ -192,7 +188,13 @@ def InvasionEspacial():
 		if jugador.vidas < 1:
 			enJuego = False
 			detenerTodo()
-		return listaEnemigo, jej_temporal, TextoVidas, enJuego
+
+		if type(listaAsteroides) == list:
+			listaAsteroides.remove(asteroide)
+			el_ast = 0
+			return listaEnemigo, jej_temporal, TextoVidas, enJuego, el_ast
+		else:
+			return listaEnemigo, jej_temporal, TextoVidas, enJuego
 		
 	while True:
 		
@@ -357,30 +359,17 @@ def InvasionEspacial():
 						asteroide.dibujar(ventana)
 				if asteroide.rect.colliderect(jugador.rect) and not jugador.eliminado:
 					
-					#ESTA SECCIÓN DE ACÁ ES IGUAL A UNA MÁS ABAJO
-					listaAsteroides.remove(asteroide)
-					jugador.destruccion()
-					jugador.eliminado = True
-					listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0])
-					listaEnemigo = []
-					jej_temporal = False
-					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
-					el_ast = 0 
-					if jugador.vidas < 1:
-						enJuego = False
-						detenerTodo()
-
-
+					listaEnemigo, jej_temporal, TextoVidas, enJuego, el_ast = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,listaAsteroides,asteroide)
 
 		if "nave_nodriza0" in locals() or "nave_nodriza0" in globals():
 			nave_nodriza0.dibujar(ventana)
 			tiempo2 = nave_nodriza0.comportamiento(tiempo,tiempo2,ventana)
 			if nave_nodriza0.laser.colliderect(jugador.rect):
-				listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_nod(nave_nodriza0,jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego)
+				listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,None,None,nave_nodriza0)
 				del nave_nodriza0
 			else:
 				if jugador.rect.collidelist(nave_nodriza0.proyectiles) > -1:
-					listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_nod(nave_nodriza0,jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego)
+					listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,None,None,nave_nodriza0)
 					del nave_nodriza0
 
 
@@ -400,17 +389,7 @@ def InvasionEspacial():
 				enemigo.dibujar(ventana)
 
 				if enemigo.rect.colliderect(jugador.rect):
-					#Y A SU VEZ ESTA ES IGUAL A OTRA MÁS ABAJO, JEJ
-					listaEnemigo.remove(enemigo)
-					jugador.destruccion()
-					jugador.eliminado = True
-					listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0])
-					listaEnemigo = []
-					jej_temporal = False
-					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
-					if jugador.vidas < 1:
-						enJuego = False
-						detenerTodo()
+					listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego)
 
 				if len(enemigo.listadisparo) > 0:
 

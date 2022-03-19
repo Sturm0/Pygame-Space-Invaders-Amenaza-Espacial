@@ -1,9 +1,8 @@
 import pygame
 from Proyectil import *
 from random import randint,uniform,choice
-class Invasor(pygame.sprite.Sprite):
+class Invasor():
 	def __init__(self,posx,posy,distancia, lista,tipo,resolución):
-		pygame.sprite.Sprite.__init__(self)
 		self.resolución = resolución
 		self.listaimagenes = [pygame.image.load(each).convert() for each in lista] 
 
@@ -35,10 +34,6 @@ class Invasor(pygame.sprite.Sprite):
 		self.seLanza = False
 
 	def dibujar(self,superficie):
-		# if self.vida == True:
-		# 	self.imagenInvasor = self.listaimagenes[self.posImagen]
-		# else:
-		# 	pass
 		self.imagenInvasor = self.listaimagenes[self.posImagen]
 
 		superficie.blit(self.imagenInvasor,self.rect)
@@ -81,9 +76,9 @@ class Invasor(pygame.sprite.Sprite):
 		self.listadisparo.append(miProyectil)
 
 	def __movimientos(self):
-		self.__movimientoLateral()
+		self.movimientoLateral()
 
-	def __movimientoLateral(self):
+	def movimientoLateral(self):
 		if self.derecha == True:
 			self.rect.left = self.rect.left + self.velocidad
 			if self.rect.left > self.limiteDerecha:

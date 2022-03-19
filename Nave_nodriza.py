@@ -15,18 +15,7 @@ class Nave_nodriza(Invasor):
 		self.img_orb = pygame.image.load('./Imagenes/enemigos/ORB_0.PNG').convert()
 
 	def comportamiento(self, tiempo,tiempo2, ventana):
-		#intentar achicar la funcionalidad de comportamiento de invasor para que pueda ser aprovechada acá más fácilmente
-		#self.__movimientos()  
-		#self.__movimientoLateral() <- intentar implementar esto bien
-		#TODO ESTO ES EQUIVALENTE A __movimientoLateral PERO POR ALGUNA RAZÓN TIRA ERROR CUANDO LO INTENTO USAR
-		if self.derecha == True:
-			self.rect.left = self.rect.left + self.velocidad
-			if self.rect.left > self.limiteDerecha:
-				self.derecha = False
-		else:
-			self.rect.left = self.rect.left - self.velocidad
-			if self.rect.left < self.limiteIzquierda:
-				self.derecha = True
+		self.movimientoLateral()
 
 		if self.tiempoCambio == round(tiempo):
 			self.posImagen += 1
@@ -69,9 +58,6 @@ class Nave_nodriza(Invasor):
 			pass
 
 		return tiempo2
-
-	def __ataque(self,ventana):
-		pass
 
 	def __disparo(self,ventana):
 		self.laser = pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],8, self.resolución[1])

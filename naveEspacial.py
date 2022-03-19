@@ -13,7 +13,7 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.rect.centerx = self.resolución[0]/2
 		self.rect.centery = self.resolución[1]-50
 		self.listadisparo = []
-		self.vidas = 5
+		self.vidas = 40
 		self.vida = True
 		self.eliminado = False
 		self.velocidad = 5
