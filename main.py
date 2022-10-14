@@ -123,6 +123,7 @@ def InvasionEspacial():
 	musc_index = 0 #índice de la pista de música
 	sonido = pygame.mixer.Sound(música[musc_index])
 	sonidoExplosion = pygame.mixer.Sound('./Sonidos/EXPLODE.WAV')
+	
 	sonido.play()
 	gameover = pygame.image.load('./Imagenes/gameover.bmp').convert()
 	gameover = pygame.transform.scale(gameover,(resolución[0],resolución[1]))
@@ -318,6 +319,7 @@ def InvasionEspacial():
 				x,y = jugador.rect.center
 				if acumulador == 10:
 					jugador.disparar(x,y,potenciador_valor)
+					
 					
 					acumulador = 0
 				acumulador += 1

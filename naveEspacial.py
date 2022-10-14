@@ -18,6 +18,8 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.eliminado = False
 		self.velocidad = 5
 		self.puntaje = 0
+		self.sonidoDisparo = pygame.mixer.Sound('./Sonidos/SHOT1.WAV')
+		self.sonidoDisparo.set_volume(.4)
 
 	def movimiento(self):
 		if self.vida == True:
@@ -33,17 +35,22 @@ class naveEspacial(pygame.sprite.Sprite):
 	def disparar(self,x,y,potenciador_valor):
 		if potenciador_valor == -1:
 			miProyectil = Proyectil(x,y,"Imagenes/SHOTS.png",True)
+			self.sonidoDisparo.play()
 		elif potenciador_valor == 0:
 			miProyectil = Proyectil(x-8,y,"Imagenes/SHOTS2.png",True)
 			miProyectil2 = Proyectil(x+5,y,"Imagenes/SHOTS2.png",True)
 			self.listadisparo.append(miProyectil2)
+			self.sonidoDisparo.play()
 		elif potenciador_valor == 1:
 			miProyectil = Proyectil(x-8,y,"Imagenes/SHOTS_3.PNG",True)
+			self.sonidoDisparo.play()
 			for index,each in enumerate([Proyectil(x+5,y,"Imagenes/SHOTS_3.PNG",True),Proyectil(x,y,"Imagenes/SHOTS_3.PNG",True)],0):
 				self.listadisparo.append(each)
 				if index == 1:
 					each.velocidadDisparo -= 1
+
 		self.listadisparo.append(miProyectil)
+
 
 	def destruccion(self):
 		#self.sonidoExplosion.play()
