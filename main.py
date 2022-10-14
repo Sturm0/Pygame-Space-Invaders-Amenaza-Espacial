@@ -267,16 +267,18 @@ def InvasionEspacial():
 			elif keys[K_UP] and keys[K_SPACE]:
 				jugador.rect.top -= jugador.velocidad
 				x,y = jugador.rect.center
-				jugador.disparar(x,y,potenciador_valor)
+				
 				if acumulador == 10:
+					jugador.disparar(x,y,potenciador_valor)
 					acumulador = 0
 				acumulador += 1
 
 			elif keys[K_DOWN] and keys[K_SPACE]:
 				jugador.rect.top += jugador.velocidad
 				x,y = jugador.rect.center
-				jugador.disparar(x,y,potenciador_valor)
+				
 				if acumulador == 10:
+					jugador.disparar(x,y,potenciador_valor)
 					acumulador = 0
 				acumulador += 1
 

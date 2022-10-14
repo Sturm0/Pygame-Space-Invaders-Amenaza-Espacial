@@ -6,7 +6,7 @@ class Proyectil(pygame.sprite.Sprite):
 		self.rect = self.imageProyectil.get_rect()
 		self.rect.top = posy
 		self.rect.left = posx
-		self.velocidadDisparo = 5
+		self.velocidadDisparo = 7
 		self.disparoPersonaje = personaje
 
 	def trayectoria(self):
