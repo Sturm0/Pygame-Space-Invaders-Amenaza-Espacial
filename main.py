@@ -140,7 +140,6 @@ def InvasionEspacial():
 	
 	#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 	enJuego = True
-	acumulador = 0
 	tiempo_niv = 0
 	reloj = pygame.time.Clock()
 
@@ -164,7 +163,6 @@ def InvasionEspacial():
 	listaExplosiones = []
 	acumulador_explosion = 0
 	TEMPORAL = True
-	potenciador_valor = -1
 	tiempo_lance = 5 #Es una variable que determina cada cuanto tiempo un ememigo va a dirigirse hacía el jugador
 	#acumulador_lance = 0 Acumulador de lance, representa el valor de X que debe tomar el enemigo cuando se lanza hacía el jugador
 	tiene_que_lanzarse = False #esta hace que un enemigo particular se mueva
@@ -212,7 +210,7 @@ def InvasionEspacial():
 
 						#print(timeit(stmt="cargarEnemigos()",number=1,globals=globals()))
 						if jugador.eliminado:
-							potenciador_valor = -1
+							jugador.potenciador_val = -1
 						tiempo256 = pygame.time.get_ticks()/1000
 						jugador.eliminado = False
 						jugador.revivir()
@@ -243,22 +241,7 @@ def InvasionEspacial():
 		keys = pygame.key.get_pressed()
 
 		if enJuego == True and 1 in keys:
-
-			if keys[K_UP]:
-				jugador.rect.top -= jugador.velocidad
-			if keys[K_DOWN]:
-				jugador.rect.top += jugador.velocidad
-			if keys[K_RIGHT]:
-				jugador.rect.left += jugador.velocidad
-			if keys[K_LEFT]:
-				jugador.rect.left -= jugador.velocidad
-			if keys[K_SPACE]:
-				x,y = jugador.rect.center
-				if acumulador == 10:
-					jugador.disparar(x,y,potenciador_valor)
-					acumulador = 0
-				acumulador += 1
-
+			jugador.entrada(keys) #esto revisa la entrada del jugador y se encarga de mover y disparar acorde
 			
 		ventana.fill((0,0,0))
 
@@ -473,9 +456,9 @@ def InvasionEspacial():
 			each.dibujar(ventana)
 			if each.rect.colliderect(jugador):
 				if each.tipo == 0:
-					potenciador_valor = 0
+					jugador.potenciador_val = 0
 				elif each.tipo == 1:
-					potenciador_valor = 1
+					jugador.potenciador_val = 1
 				elif each.tipo == 2:
 					jugador.vidas += 1
 					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))

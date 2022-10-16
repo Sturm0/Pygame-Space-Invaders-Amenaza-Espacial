@@ -1,8 +1,9 @@
 import pygame
 from Proyectil import *
+from pygame.locals import *
 class naveEspacial(pygame.sprite.Sprite):
 	#clase para las naves
-	def __init__(self,explosion,resolución):
+	def __init__(self,explosion,resolución,asignaciones=[K_UP,K_DOWN,K_RIGHT,K_LEFT,K_SPACE]):
 
 		pygame.sprite.Sprite.__init__(self)
 		self.resolución = resolución
@@ -20,6 +21,9 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.puntaje = 0
 		self.sonidoDisparo = pygame.mixer.Sound('./Sonidos/SHOT1.WAV')
 		self.sonidoDisparo.set_volume(.4)
+		self.asignaciones = asignaciones
+		self.acumulador = 0
+		self.potenciador_val = -1
 
 	def movimiento(self):
 		if self.vida == True:
@@ -69,3 +73,21 @@ class naveEspacial(pygame.sprite.Sprite):
 	def dibujar(self,superficie,vida=True):
 		if vida:
 			superficie.blit(self.ImagenNave,self.rect)
+
+	def entrada(self,teclas):
+		#sirve para leer la entrada del jugador y actuar acorde
+		if teclas[self.asignaciones[0]]:
+			self.rect.top -= self.velocidad
+		if teclas[self.asignaciones[1]]:
+			self.rect.top += self.velocidad
+		if teclas[self.asignaciones[2]]:
+			self.rect.left += self.velocidad
+		if teclas[self.asignaciones[3]]:
+			self.rect.left -= self.velocidad
+		if teclas[self.asignaciones[4]]:
+			x,y = self.rect.center
+			if self.acumulador == 10:
+				self.disparar(x,y,self.potenciador_val)
+				self.acumulador = 0
+			self.acumulador += 1
+		pass
