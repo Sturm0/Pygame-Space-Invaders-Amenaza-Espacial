@@ -244,85 +244,21 @@ def InvasionEspacial():
 
 		if enJuego == True and 1 in keys:
 
-			if keys[K_RIGHT] and keys[K_SPACE] and keys[K_UP]:
-				jugador.rect.left += jugador.velocidad
+			if keys[K_UP]:
 				jugador.rect.top -= jugador.velocidad
-				x,y = jugador.rect.center
-				if acumulador == 10:
-					jugador.disparar(x,y,potenciador_valor)
-					
-					acumulador = 0
-				acumulador += 1
-
-			#problemas acá no entra
-			elif bool(keys[K_LEFT]) and bool(keys[K_UP]) and keys[K_SPACE]:
-				jugador.rect.left -= jugador.velocidad
-				jugador.rect.top -= jugador.velocidad
-				x,y = jugador.rect.center
-				if acumulador == 10:
-					jugador.disparar(x,y,potenciador_valor)
-					
-					acumulador = 0
-				acumulador += 1
-
-			elif keys[K_UP] and keys[K_SPACE]:
-				jugador.rect.top -= jugador.velocidad
-				x,y = jugador.rect.center
-				
-				if acumulador == 10:
-					jugador.disparar(x,y,potenciador_valor)
-					acumulador = 0
-				acumulador += 1
-
-			elif keys[K_DOWN] and keys[K_SPACE]:
+			if keys[K_DOWN]:
 				jugador.rect.top += jugador.velocidad
+			if keys[K_RIGHT]:
+				jugador.rect.left += jugador.velocidad
+			if keys[K_LEFT]:
+				jugador.rect.left -= jugador.velocidad
+			if keys[K_SPACE]:
 				x,y = jugador.rect.center
-				
 				if acumulador == 10:
 					jugador.disparar(x,y,potenciador_valor)
 					acumulador = 0
 				acumulador += 1
 
-			elif keys[K_RIGHT] and keys[K_SPACE]:
-				jugador.rect.left += jugador.velocidad
-				x,y = jugador.rect.center
-				if acumulador == 10:
-					jugador.disparar(x,y,potenciador_valor)
-					
-					acumulador = 0
-				acumulador += 1
-
-			elif keys[K_LEFT] and keys[K_SPACE]:
-				jugador.rect.left -= jugador.velocidad
-				x,y = jugador.rect.center
-				if acumulador == 10:
-					jugador.disparar(x,y,potenciador_valor)
-					
-					acumulador = 0
-				acumulador += 1
-			elif keys[K_UP] and keys[K_LEFT]:
-				jugador.rect.top -= jugador.velocidad
-				jugador.rect.left -= jugador.velocidad
-
-			elif keys[K_UP] and keys[K_RIGHT]:
-				jugador.rect.top -= jugador.velocidad
-				jugador.rect.left += jugador.velocidad
-			elif keys[K_UP]:
-				jugador.rect.top -= jugador.velocidad
-			elif keys[K_DOWN]:
-				jugador.rect.top += jugador.velocidad
-			elif keys[K_RIGHT]:
-				jugador.rect.left += jugador.velocidad
-			elif keys[K_LEFT]:
-				jugador.rect.left -= jugador.velocidad
-			elif keys[K_SPACE]:
-				x,y = jugador.rect.center
-				if acumulador == 10:
-					jugador.disparar(x,y,potenciador_valor)
-					
-					
-					acumulador = 0
-				acumulador += 1
 			
 		ventana.fill((0,0,0))
 
