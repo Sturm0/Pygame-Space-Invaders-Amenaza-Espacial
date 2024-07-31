@@ -9,7 +9,7 @@ class Nave_nodriza(Invasor):
 		self.limiteIzquierda = 0
 		self.cant_vids = 10
 		self.tiempo_rayo_comienzo = 1
-		self.laser = pygame.Rect(0,0,0,0)
+		self.laser = pygame.Rect(0,0,8,self.resolución[1])
 		self.tiempo_rayo = 0
 		self.proyectiles = []
 		self.img_orb = pygame.image.load('./Imagenes/enemigos/ORB_0.PNG').convert()
@@ -34,6 +34,8 @@ class Nave_nodriza(Invasor):
 
 		if tiempo > self.tiempo_rayo and tiempo < self.tiempo_rayo+1:
 			self.__disparo(ventana)
+		else:
+			self.laser.topleft = (0,0)
 
 		try:
 			if self.proyectiles[0].top < self.resolución[1]:
@@ -60,5 +62,7 @@ class Nave_nodriza(Invasor):
 		return tiempo2
 
 	def __disparo(self,ventana):
-		self.laser = pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],8, self.resolución[1])
+		self.laser.left = self.rect.midbottom[0]
+		self.laser.top = self.rect.midbottom[1]
 		pygame.draw.rect(ventana,(135,206,235),self.laser)
+		

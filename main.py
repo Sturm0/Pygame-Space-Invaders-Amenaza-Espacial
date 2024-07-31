@@ -199,7 +199,6 @@ def InvasionEspacial():
 		
 		tiempo = (pygame.time.get_ticks()/1000)-tiempo256
 		jugador.movimiento()
-		
 		for event in pygame.event.get():
 			if event.type == QUIT:
 				pygame.quit()
