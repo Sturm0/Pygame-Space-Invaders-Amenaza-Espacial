@@ -19,7 +19,8 @@ def limpiar_pantalla():
 	else:
 		system('clear')
 limpiar_pantalla()
-resolución =  (1280,720)
+resolución = (800,600)
+
 with open("Configuraciones.txt",'r') as archivo:
 	for each in archivo:
 		if each[0] != "#":
