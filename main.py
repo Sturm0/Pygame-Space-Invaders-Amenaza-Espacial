@@ -41,7 +41,6 @@ niv = 0
 #Carga de imagenes
 logo = pygame.image.load("./Imagenes/LOGO.png").convert()
 size_logo = logo.get_size()
-logo = pygame.transform.scale(logo,(size_logo[0]*2,size_logo[1]*2))
 vent_rect = ventana.get_rect()
 logo_rect = logo.get_rect()
 logo_rect.center = vent_rect.center

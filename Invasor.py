@@ -5,6 +5,7 @@ class Invasor():
 	def __init__(self,posx,posy,distancia, lista,tipo,resolución):
 		self.resolución = resolución
 		self.listaimagenes = [pygame.image.load(each).convert() for each in lista] 
+		self.sonido_disparo = pygame.mixer.Sound('./Sonidos/DIVE.ogg')
 
 		if tipo == 0:
 			self.imagen_disparo = "Imagenes/enemigos/ESHOT_0.png"
@@ -20,7 +21,7 @@ class Invasor():
 		self.imagenInvasor = self.listaimagenes[self.posImagen]
 		self.rect = self.imagenInvasor.get_rect()
 		self.listadisparo = []
-		self.velocidad = 2
+		self.velocidad = 1
 		self.rect.top = posy
 		self.rect.left = posx
 		
@@ -74,6 +75,7 @@ class Invasor():
 		x,y = self.rect.center
 		miProyectil = Proyectil(x,y,self.imagen_disparo, False)
 		self.listadisparo.append(miProyectil)
+		self.sonido_disparo.play()
 
 	def __movimientos(self):
 		self.movimientoLateral()
