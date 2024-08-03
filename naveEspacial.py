@@ -20,7 +20,7 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.velocidad = 4
 		self.puntaje = 0
 		self.sonidoDisparo = pygame.mixer.Sound('./Sonidos/SHOT1.WAV')
-		self.sonidoDisparo.set_volume(.4)
+		self.sonido_laser = pygame.mixer.Sound('./Sonidos/LASER.WAV')
 		self.asignaciones = asignaciones
 		self.acumulador = 0
 		self.potenciador_val = -1

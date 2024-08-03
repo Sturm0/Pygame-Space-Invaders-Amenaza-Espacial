@@ -1,5 +1,7 @@
 import pygame
 from Invasor import *
+from time import  time
+from Orbe import *
 class Nave_nodriza(Invasor):
 	def __init__(self,posx,posy,distancia, lista,tipo,resolución):
 		super().__init__(posx,posy,distancia,lista,tipo,resolución)
@@ -9,11 +11,11 @@ class Nave_nodriza(Invasor):
 		self.limiteIzquierda = 0
 		self.cant_vids = 10
 		self.tiempo_rayo_comienzo = 1
-		self.laser = pygame.Rect(0,0,8,self.resolución[1])
+		self.laser = pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],8,self.resolución[1]/3)
 		self.tiempo_rayo = 0
-		self.proyectiles = []
-		self.img_orb = pygame.image.load('./Imagenes/enemigos/ORB_0.PNG').convert()
-
+		self.lista_orbes = []
+		self.sonido_laser = pygame.mixer.Sound('./Sonidos/LASER.WAV')
+		
 	def comportamiento(self, tiempo,tiempo2, ventana):
 		self.movimientoLateral()
 
@@ -25,44 +27,33 @@ class Nave_nodriza(Invasor):
 				self.posImagen = 0
 
 		if self.tiempo_rayo_comienzo == round(tiempo):
+			
 			self.tiempo_rayo_comienzo += 3
 			self.tiempo_rayo = round(tiempo)
 
-			for each in range(3):
-				self.proyectiles.append(self.img_orb.get_rect(topleft=(self.rect.midbottom[0],self.rect.midbottom[1])))
-				
+			self.lista_orbes.append(Orbe((self.rect.midbottom[0],self.rect.midbottom[1]),"izquierda"))
+			self.lista_orbes.append(Orbe((self.rect.midbottom[0],self.rect.midbottom[1]),"centro"))
+			self.lista_orbes.append(Orbe((self.rect.midbottom[0],self.rect.midbottom[1]),"derecha"))
+			self.lista_orbes[0].sonido.play()
+			self.sonido_laser.play()
 
 		if tiempo > self.tiempo_rayo and tiempo < self.tiempo_rayo+1:
 			self.__disparo(ventana)
 		else:
 			self.laser.topleft = (0,0)
-
-		try:
-			if self.proyectiles[0].top < self.resolución[1]:
-				self.proyectiles[0].top += 5
-
-			if self.proyectiles[1].top < self.resolución[1]:
-				self.proyectiles[1].top += 5
-				self.proyectiles[1].left -= 4
-
-			if self.proyectiles[2].top < self.resolución[1]:
-				self.proyectiles[2].top += 5
-				self.proyectiles[2].left += 4
-
-			for each in self.proyectiles:
-				ventana.blit(self.img_orb,each)
-
-				if each.top > self.resolución[1]:
-					
-					self.proyectiles = []
-
-		except:
-			pass
+			self.laser.height = self.resolución[1]/3
+				
+		for each in self.lista_orbes:
+			each.update()
+			each.dibujar(ventana)
+			if each.rect.top > self.resolución[1]:
+				self.lista_orbes = []
 
 		return tiempo2
 
 	def __disparo(self,ventana):
 		self.laser.left = self.rect.midbottom[0]
 		self.laser.top = self.rect.midbottom[1]
+		self.laser.height += 4
 		pygame.draw.rect(ventana,(135,206,235),self.laser)
 		

@@ -37,6 +37,7 @@ listaEnemigo = []
 explosion = []
 id_objetivo = None
 
+
 niv = 0
 #Carga de imagenes
 logo = pygame.image.load("./Imagenes/LOGO.png").convert()
@@ -290,7 +291,7 @@ def InvasionEspacial():
 				listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,None,None,nave_nodriza0)
 				del nave_nodriza0
 			else:
-				if jugador.rect.collidelist(nave_nodriza0.proyectiles) > -1:
+				if jugador.rect.collidelist(nave_nodriza0.lista_orbes) > -1:
 					listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,None,None,nave_nodriza0)
 					del nave_nodriza0
 
@@ -338,6 +339,7 @@ def InvasionEspacial():
 			transparencia = 0
 				
 		elif niv != 0:
+			# ~ transparencia = 0 #ELIMINAR ESTO UNA VEZ QUE TERMINES DE DEPURAR!
 			if (niv != camp_ast or el_ast >= 20 or jugador.eliminado) and (niv != niv_nod or ("nave_nodriza0" not in locals() and "nave_nodriza0" not in globals())):
 				tiempo_niv = time() #la hora cuando se muestra el cártel que indica que pasaste de nivel
 				if (niv == camp_ast-1 and not jugador.eliminado) or (niv == camp_ast and jugador.eliminado):
@@ -446,6 +448,11 @@ def InvasionEspacial():
 								jugador.puntaje += 1000
 								listaExplosiones.append([nave_nodriza0.rect.left,nave_nodriza0.rect.top,time(),0])
 								del nave_nodriza0
+						if x.rect.collidelist(nave_nodriza0.lista_orbes) != -1:
+							try:
+								jugador.listadisparo.remove(x)
+							except:
+								pass
 									
 		if not jugador.eliminado and jugador.rect.left < resolución[0]: #jugador.rect.top < resolucion[1]
 			jugador.dibujar(ventana)
@@ -454,6 +461,7 @@ def InvasionEspacial():
 			each.mover()
 			each.dibujar(ventana)
 			if each.rect.colliderect(jugador):
+				each.sonido.play()
 				if each.tipo == 0:
 					jugador.potenciador_val = 0
 				elif each.tipo == 1:
@@ -495,7 +503,6 @@ def InvasionEspacial():
 		if niv == 0:
 			ventana.blit(logo,(logo_rect))
 			jugador.rect.left = resolución[0]+700
-
 		acumulador_fotograma += 1
 		reloj.tick(60)
 		pygame.display.update()

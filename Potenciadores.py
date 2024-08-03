@@ -8,6 +8,7 @@ class Potenciadores(pygame.sprite.Sprite):
 		self.rect.left = x
 		self.rect.top = y
 		self.tipo = índice
+		self.sonido = pygame.mixer.Sound('./Sonidos/POWER.WAV')
 	def dibujar(self,ventana):
 		ventana.blit(self.potenciador,self.rect)
 	def mover(self):
