@@ -10,6 +10,7 @@ from Invasor import *
 from Nave_nodriza import *
 from Asteroide import *
 from Potenciadores import *
+from Explosion import *
 #from timeit import timeit
 #from functools import lru_cache después ver si podes integrar esto en la generación de enemigos
 #Actualmente hay dos sistemas de explosiones implementados, uno para los asteroides, nave nodriza, jugador y otro para los enemigos. Mejorar y usar el primero para todo
@@ -34,9 +35,8 @@ pygame.display.set_caption("Space Invaders Amenaza Espacial")
 #Variables globales
 jej_temporal = True #Cambiarle el nombre para que se entienda que hace
 listaEnemigo = []
-explosion = []
 id_objetivo = None
-
+explosion = []
 
 niv = 0
 #Carga de imagenes
@@ -55,14 +55,25 @@ listaPotenciadores = [] #imagenes de todos los potenciadores, CAMBIAR EL NOMBRE 
 for each in ['./Imagenes/Potenciadores/Potenciador_%s.PNG'%x for x in range(0,3)]:
 	if each != None:
 		listaPotenciadores.append(pygame.image.load(each).convert())
+imagenes_invasores = [[pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"]]
+					 ,[pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)]]
+					 ,[pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)]]]
 
+
+disparos_invasor = [pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ESHOT_0.png","Imagenes/enemigos/ESHOT_1.png","Imagenes/enemigos/ESHOT_2.png"]]
+disparos_jugador = [pygame.image.load(each).convert() for each in ["Imagenes/SHOTS.png","Imagenes/SHOTS2.png","Imagenes/SHOTS3.png"]]
+
+imagenes_nave_nodriza = [pygame.image.load(each).convert() for each in ["./Imagenes/enemigos/BOSS_%s.png"%x for x in range(0,3)]]
+
+#Carga de sonido
+sonido_potenciadores = pygame.mixer.Sound('./Sonidos/POWER.WAV')
 
 def detenerTodo(*args):
 	for enemigo in listaEnemigo:
 		for disparo in enemigo.listadisparo:
 			enemigo.listadisparo.remove(disparo)
 		enemigo.conquista = True
-
+		
 #se podría agregar un decorador cache a esta función para hacerla más rápida
 #@lru_cache(maxsize=2)
 #							|-mejorar esto-|
@@ -72,28 +83,11 @@ def cargarEnemigos(tipo):
 	lista_y = [20,120,220]
 	posx = 0
 	#todas esta sección debería estar ligada a la resolución o van a surgir problemas al cambiarse la resolución
-	if tipo == 0:
-		for cada_uno in lista_y:
+	for cada_uno in lista_y:
 			for x in range(1,11):
-				enemigo = Invasor(posx,cada_uno,posición_limite,["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"],0,resolución)				
+				enemigo = Invasor(posx,cada_uno,posición_limite,imagenes_invasores,disparos_invasor,tipo,resolución)
 				listaEnemigo.append(enemigo)
 				posx += valor_aum
-				if x == 9:
-					posx = 0
-	elif tipo == 1:
-		for cada_uno in lista_y:
-			for x in range(1,11):
-				enemigo = Invasor(posx,cada_uno,posición_limite,["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)],1,resolución)
-				listaEnemigo.append(enemigo)
-				posx += valor_aum #resolución[0]/10
-				if x == 9:
-					posx = 0
-	else:
-		for cada_uno in lista_y:
-			for x in range(1,11):
-				enemigo = Invasor(posx,cada_uno,posición_limite,["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)],2,resolución)
-				listaEnemigo.append(enemigo)
-				posx += valor_aum #resolución[0]/10
 				if x == 9:
 					posx = 0
 
@@ -135,7 +129,7 @@ def InvasionEspacial():
 	miFuenteNivel = pygame.font.Font(None,50)
 	Texto = miFuenteFin.render("Fin del juego",0,(120,100,40))
 
-	jugador = naveEspacial(explosion,resolución)
+	jugador = naveEspacial(explosion,resolución,disparos_jugador)
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
@@ -224,7 +218,7 @@ def InvasionEspacial():
 							índiceLance,objetivo_cambio = cargarEnemigos(0)
 
 						elif niv == niv_nod:
-							nave_nodriza0 = Nave_nodriza(resolución[0]/2,20,7000,["./Imagenes/enemigos/BOSS_%s.png"%x for x in range(0,3)],2,resolución) #el 7000 no debería tener ningún efecto
+							nave_nodriza0 = Nave_nodriza(resolución[0]/2,20,resolución,imagenes_nave_nodriza)
 							
 
 						elif niv > camp_ast and niv < niv_nod+2:
@@ -408,28 +402,7 @@ def InvasionEspacial():
 
 					for asteroide in listaAsteroides:
 						if x.rect.colliderect(asteroide.rect):
-							if niv == camp_ast:
-								prob_poten = 20 # es para que no aparezcan demasiados potenciadores en el nivel del campo de asteroides
-							else:
-								prob_poten = 40
-							if randint(0,100) <= prob_poten:
-								lista_potenciadores.append(Potenciadores(0,asteroide.rect.left,asteroide.rect.top,listaPotenciadores))
-
-							elif randint(0,100) <= prob_poten-10:
-								lista_potenciadores.append(Potenciadores(1,asteroide.rect.left,asteroide.rect.top,listaPotenciadores))
-							elif randint(0,100) <= prob_poten-20:
-								lista_potenciadores.append(Potenciadores(2,asteroide.rect.left,asteroide.rect.top,listaPotenciadores))
-								
-							listaAsteroides.remove(asteroide)
-							#acá se genera un error a veces, ni idea porque
-							try:
-								jugador.listadisparo.remove(x)
-							except:
-								pass
-							listaExplosiones.append([asteroide.rect.left,asteroide.rect.top,time(),0])
-							sonidoExplosion.play()
-							if niv == camp_ast:
-								el_ast += 1
+							el_ast = asteroide.recibir_disparo(niv,camp_ast,lista_potenciadores,listaAsteroides,jugador.listadisparo,listaExplosiones,el_ast,listaPotenciadores,sonidoExplosion,sonido_potenciadores)
 
 					if niv == niv_nod and ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()):
 						if x.rect.colliderect(nave_nodriza0):
@@ -448,7 +421,7 @@ def InvasionEspacial():
 								jugador.puntaje += 1000
 								listaExplosiones.append([nave_nodriza0.rect.left,nave_nodriza0.rect.top,time(),0])
 								del nave_nodriza0
-						if x.rect.collidelist(nave_nodriza0.lista_orbes) != -1:
+						if ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()) and x.rect.collidelist(nave_nodriza0.lista_orbes) != -1:
 							try:
 								jugador.listadisparo.remove(x)
 							except:
@@ -461,7 +434,8 @@ def InvasionEspacial():
 			each.mover()
 			each.dibujar(ventana)
 			if each.rect.colliderect(jugador):
-				each.sonido.play()
+				pygame.mixer.Channel(1).play(each.sonido) #sin esto de channel 1 el sonido del potenciador no puede reproducirse a la vez que otros sonidos, más info en el commit
+				
 				if each.tipo == 0:
 					jugador.potenciador_val = 0
 				elif each.tipo == 1:

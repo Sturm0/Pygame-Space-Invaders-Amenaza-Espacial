@@ -3,11 +3,10 @@ from Invasor import *
 from time import  time
 from Orbe import *
 class Nave_nodriza(Invasor):
-	def __init__(self,posx,posy,distancia, lista,tipo,resolución):
-		super().__init__(posx,posy,distancia,lista,tipo,resolución)
-
+	def __init__(self,posx,posy,resolución,lista_imagenes):
+		super().__init__(posx,posy,7000,[lista_imagenes],[7000],0,resolución) #el 7000 no debería tener ningún efecto, el [7000] tampoco debería afectar porque total no uso los disparos del invasor padre en ningún lado acá
+		
 		self.limiteDerecha = self.resolución[0] - self.listaimagenes[0].get_size()[0]
-		print(self.listaimagenes[0].get_size()[0])
 		self.limiteIzquierda = 0
 		self.cant_vids = 10
 		self.tiempo_rayo_comienzo = 1

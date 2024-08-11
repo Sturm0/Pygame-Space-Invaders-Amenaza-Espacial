@@ -1,9 +1,9 @@
 import pygame
 from Proyectil import *
 from pygame.locals import *
-class naveEspacial(pygame.sprite.Sprite):
+class naveEspacial():
 	#clase para las naves
-	def __init__(self,explosion,resolución,asignaciones=[K_UP,K_DOWN,K_RIGHT,K_LEFT,K_SPACE]):
+	def __init__(self,explosion,resolución,disparos_jugador,asignaciones=[K_UP,K_DOWN,K_RIGHT,K_LEFT,K_SPACE]):
 
 		pygame.sprite.Sprite.__init__(self)
 		self.resolución = resolución
@@ -24,6 +24,7 @@ class naveEspacial(pygame.sprite.Sprite):
 		self.asignaciones = asignaciones
 		self.acumulador = 0
 		self.potenciador_val = -1
+		self.disparos_jugador = disparos_jugador
 
 	def movimiento(self):
 		if self.vida == True:
@@ -38,17 +39,18 @@ class naveEspacial(pygame.sprite.Sprite):
 				self.rect.top = self.resolución[1]
 	def disparar(self,x,y,potenciador_valor):
 		if potenciador_valor == -1:
-			miProyectil = Proyectil(x,y,"Imagenes/SHOTS.png",True)
+			miProyectil = Proyectil(x,y,self.disparos_jugador[0],True)
+			
 			self.sonidoDisparo.play()
 		elif potenciador_valor == 0:
-			miProyectil = Proyectil(x-8,y,"Imagenes/SHOTS2.png",True)
-			miProyectil2 = Proyectil(x+5,y,"Imagenes/SHOTS2.png",True)
+			miProyectil = Proyectil(x-8,y,self.disparos_jugador[1],True)
+			miProyectil2 = Proyectil(x+5,y,self.disparos_jugador[1],True)
 			self.listadisparo.append(miProyectil2)
 			self.sonidoDisparo.play()
 		elif potenciador_valor == 1:
-			miProyectil = Proyectil(x-8,y,"Imagenes/SHOTS_3.PNG",True)
+			miProyectil = Proyectil(x-8,y,self.disparos_jugador[2],True)
 			self.sonidoDisparo.play()
-			for index,each in enumerate([Proyectil(x+5,y,"Imagenes/SHOTS_3.PNG",True),Proyectil(x,y,"Imagenes/SHOTS_3.PNG",True)],0):
+			for index,each in enumerate([Proyectil(x+5,y,self.disparos_jugador[2],True),Proyectil(x,y,self.disparos_jugador[2],True)],0):
 				self.listadisparo.append(each)
 				if index == 1:
 					each.velocidadDisparo -= 1

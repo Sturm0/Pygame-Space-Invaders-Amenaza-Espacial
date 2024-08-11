@@ -1,8 +1,9 @@
 import pygame
-class Proyectil(pygame.sprite.Sprite):
-	def __init__(self,posx,posy, ruta, personaje):
+class Proyectil():
+	def __init__(self,posx,posy, imageProyectil, personaje):
 		pygame.sprite.Sprite.__init__(self)
-		self.imageProyectil = pygame.image.load(ruta).convert()
+		# ~ self.imageProyectil = pygame.image.load(ruta).convert()
+		self.imageProyectil = imageProyectil
 		self.rect = self.imageProyectil.get_rect()
 		self.rect.top = posy
 		self.rect.left = posx

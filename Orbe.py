@@ -1,7 +1,7 @@
 import pygame
 from time import  time
 
-class Orbe(pygame.sprite.Sprite):
+class Orbe():
 	def __init__(self,topleft,direccion):
 		self.direccion = direccion		
 		self.velocidad_vertical = 4

@@ -2,19 +2,17 @@ import pygame
 from Proyectil import *
 from random import randint,uniform,choice
 class Invasor():
-	def __init__(self,posx,posy,distancia, lista,tipo,resolución):
+	def __init__(self,posx,posy,distancia, imagenes_invasores,disparos_invasor,tipo,resolución):
 		self.resolución = resolución
-		self.listaimagenes = [pygame.image.load(each).convert() for each in lista] 
+		self.listaimagenes = imagenes_invasores[tipo]
 		self.sonido_disparo = pygame.mixer.Sound('./Sonidos/DIVE.ogg')
+		self.imagen_disparo = disparos_invasor[tipo]
 
 		if tipo == 0:
-			self.imagen_disparo = "Imagenes/enemigos/ESHOT_0.png"
 			self.rangoDisparo = 1 #Determina la probabilidad de disparo
 		if tipo == 1:
-			self.imagen_disparo = "Imagenes/enemigos/ESHOT_1.png"
 			self.rangoDisparo = 2
 		elif tipo == 2:
-			self.imagen_disparo = "Imagenes/enemigos/ESHOT_2.png"
 			self.rangoDisparo = 3
 
 		self.posImagen = 0	
