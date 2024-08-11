@@ -5,13 +5,10 @@ from Explosion import Explosion
 
 class Asteroide():
 	velocidad = 5
-	def __init__(self,posx,posy):
+	def __init__(self,posx,posy,listaimagenes):
 		pygame.sprite.Sprite.__init__(self)
-		self.listaimagenes = []
+		self.listaimagenes = listaimagenes
 		self.vida = True
-		for each in ['./Imagenes/Asteroides/ASTEROID%s.PNG'%x for x in range(0,5)]:
-			if each != None:
-				self.listaimagenes.append(pygame.image.load(each).convert())
 		self.rand = randint(0,3)
 		self.rect = self.listaimagenes[self.rand].get_rect()
 		self.rect.left = posx

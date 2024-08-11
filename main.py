@@ -46,25 +46,40 @@ vent_rect = ventana.get_rect()
 logo_rect = logo.get_rect()
 logo_rect.center = vent_rect.center
 
+EXPLOSION_IMAGEN = pygame.image.load('Imagenes/EXPLODE.PNG').convert()
+imagenes_invasores_todo_unido = [pygame.image.load('Imagenes/enemigos/ENEMY.PNG').convert()
+					            ,pygame.image.load('Imagenes/enemigos/ENEMY2.PNG').convert()
+					            ,pygame.image.load('Imagenes/enemigos/ENEMY3.PNG').convert()]
+					 
+imagen_potenciadores_todo_unido = pygame.image.load('./Imagenes/POWERUPS.PNG').convert()
+imagen_asteroides_todo_unido = pygame.image.load('Imagenes/ASTEROIDS.PNG').convert()
+imagen_nave_nodriza_todo_unido = pygame.image.load('Imagenes/enemigos/BOSS.PNG').convert()
 
-for each in ['./Imagenes/EXPLODE/EXPLODE%s.PNG'%x for x in range(1,21)]:
-	if each != None:
-		explosion.append(pygame.image.load(each).convert())
-
-listaPotenciadores = [] #imagenes de todos los potenciadores, CAMBIAR EL NOMBRE PARA QUE NO SE CONFUNDA CON lista_potenciadores
-for each in ['./Imagenes/Potenciadores/Potenciador_%s.PNG'%x for x in range(0,3)]:
-	if each != None:
-		listaPotenciadores.append(pygame.image.load(each).convert())
-imagenes_invasores = [[pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ENEMY01.png","Imagenes/enemigos/ENEMY02.png","Imagenes/enemigos/ENEMY03.png"]]
-					 ,[pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ENEMY2_%s.PNG"%x for x in range(1,5)]]
-					 ,[pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ENEMY3_%s.PNG"%x for x in range(1,4)]]]
-
-
-disparos_invasor = [pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ESHOT_0.png","Imagenes/enemigos/ESHOT_1.png","Imagenes/enemigos/ESHOT_2.png"]]
+# ~ disparos_invasor = [pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ESHOT_0.png","Imagenes/enemigos/ESHOT_1.png","Imagenes/enemigos/ESHOT_2.png"]]
+imagen_disparos_invasor = pygame.image.load('Imagenes/enemigos/ESHOTS.PNG').convert()
 disparos_jugador = [pygame.image.load(each).convert() for each in ["Imagenes/SHOTS.png","Imagenes/SHOTS2.png","Imagenes/SHOTS3.png"]]
 
-imagenes_nave_nodriza = [pygame.image.load(each).convert() for each in ["./Imagenes/enemigos/BOSS_%s.png"%x for x in range(0,3)]]
+# ~ imagenes_nave_nodriza = [pygame.image.load(each).convert() for each in ["./Imagenes/enemigos/BOSS_%s.png"%x for x in range(0,3)]]
 
+def partidor_de_imagenes(ancho_de_sprite,imagen):
+	#esta función es para obtener cada uno de los sprites de por ejemplo la tira de sprites que es ASTEROIDS.PNG
+	sprite_inicio = 0 #indica cuantos pixeles a la izquierda está el origen en la imagen, para poder ir seleccionando los distintos estados del sprite
+	res = []
+	while sprite_inicio < imagen.get_width():
+		superficie = pygame.Surface((ancho_de_sprite, imagen.get_height()))
+		superficie.blit(imagen,(0,0),(sprite_inicio,0,ancho_de_sprite,imagen.get_height()))
+		res.append(superficie)
+		sprite_inicio += ancho_de_sprite
+	return res
+	
+#acá se parten las imagenes anteriormente cargadas
+explosion = partidor_de_imagenes(32,EXPLOSION_IMAGEN)
+imagenes_invasores = [partidor_de_imagenes(32,imagenes_invasores_todo_unido[i]) for i in range(len(imagenes_invasores_todo_unido))]
+imagenes_potenciadores = partidor_de_imagenes(32,imagen_potenciadores_todo_unido)
+del imagenes_potenciadores[2] #porque la verdad que no tengo idea que hace ese potenciador
+imagenes_asteroides = partidor_de_imagenes(32,imagen_asteroides_todo_unido)
+imagenes_nave_nodriza = partidor_de_imagenes(96,imagen_nave_nodriza_todo_unido)
+disparos_invasor = partidor_de_imagenes(7,imagen_disparos_invasor)
 #Carga de sonido
 sonido_potenciadores = pygame.mixer.Sound('./Sonidos/POWER.WAV')
 
@@ -107,7 +122,7 @@ def InvasionEspacial():
 		for each in range(0,cantidad):
 			#Después hacer que tenga en cuenta el tamaño de los asteroides
 			x = randint(0,resolución[0])
-			lista.append(Asteroide(x,-número))
+			lista.append(Asteroide(x,-número,imagenes_asteroides))
 			número += 20 #resolución[1]/2
 		return lista
 
@@ -269,7 +284,7 @@ def InvasionEspacial():
 					else:
 						x = randint(0,resolución[0])
 						y = randint(0,resolución[1])
-						listaAsteroides.append(Asteroide(x,-y))
+						listaAsteroides.append(Asteroide(x,-y,imagenes_asteroides))
 				else:
 					asteroide.rect.top += asteroide.velocidad
 					if asteroide.rect.top > 0:
@@ -402,7 +417,7 @@ def InvasionEspacial():
 
 					for asteroide in listaAsteroides:
 						if x.rect.colliderect(asteroide.rect):
-							el_ast = asteroide.recibir_disparo(niv,camp_ast,lista_potenciadores,listaAsteroides,jugador.listadisparo,listaExplosiones,el_ast,listaPotenciadores,sonidoExplosion,sonido_potenciadores)
+							el_ast = asteroide.recibir_disparo(niv,camp_ast,lista_potenciadores,listaAsteroides,jugador.listadisparo,listaExplosiones,el_ast,imagenes_potenciadores,sonidoExplosion,sonido_potenciadores)
 
 					if niv == niv_nod and ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()):
 						if x.rect.colliderect(nave_nodriza0):
