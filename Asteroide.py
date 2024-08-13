@@ -17,7 +17,7 @@ class Asteroide():
 	def dibujar(self,superficie):
 		superficie.blit(self.listaimagenes[self.rand],(self.rect.left,self.rect.top))
 		
-	def recibir_disparo(self,niv,camp_ast,lista_potenciadores,listaAsteroides,listadisparo,listaExplosiones,el_ast,listaPotenciadores,sonidoExplosion,sonido_potenciadores):
+	def recibir_disparo(self,niv,camp_ast,lista_potenciadores,listaAsteroides,listadisparo,listaExplosiones,el_ast,listaPotenciadores,sonidoExplosion,sonido_potenciadores,imagenes_explosion):
 		from Potenciadores import Potenciadores
 		
 		if niv == camp_ast:
@@ -37,9 +37,8 @@ class Asteroide():
 			listadisparo.remove(x)
 		except:
 			pass
-		listaExplosiones.append([self.rect.left,self.rect.top,time(),0])
-		una_explosion = Explosion(sonidoExplosion)
-		una_explosion.sonidoExplosion.play()
+		listaExplosiones.append(Explosion(self.rect.left,self.rect.top,sonidoExplosion,imagenes_explosion))
+
 		if niv == camp_ast:
 			el_ast += 1
 		return el_ast

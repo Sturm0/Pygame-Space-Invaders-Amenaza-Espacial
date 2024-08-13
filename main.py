@@ -55,11 +55,8 @@ imagen_potenciadores_todo_unido = pygame.image.load('./Imagenes/POWERUPS.PNG').c
 imagen_asteroides_todo_unido = pygame.image.load('Imagenes/ASTEROIDS.PNG').convert()
 imagen_nave_nodriza_todo_unido = pygame.image.load('Imagenes/enemigos/BOSS.PNG').convert()
 
-# ~ disparos_invasor = [pygame.image.load(each).convert() for each in ["Imagenes/enemigos/ESHOT_0.png","Imagenes/enemigos/ESHOT_1.png","Imagenes/enemigos/ESHOT_2.png"]]
 imagen_disparos_invasor = pygame.image.load('Imagenes/enemigos/ESHOTS.PNG').convert()
 disparos_jugador = [pygame.image.load(each).convert() for each in ["Imagenes/SHOTS.png","Imagenes/SHOTS2.png","Imagenes/SHOTS3.png"]]
-
-# ~ imagenes_nave_nodriza = [pygame.image.load(each).convert() for each in ["./Imagenes/enemigos/BOSS_%s.png"%x for x in range(0,3)]]
 
 def partidor_de_imagenes(ancho_de_sprite,imagen):
 	#esta función es para obtener cada uno de los sprites de por ejemplo la tira de sprites que es ASTEROIDS.PNG
@@ -73,7 +70,7 @@ def partidor_de_imagenes(ancho_de_sprite,imagen):
 	return res
 	
 #acá se parten las imagenes anteriormente cargadas
-explosion = partidor_de_imagenes(32,EXPLOSION_IMAGEN)
+imagenes_explosion = partidor_de_imagenes(32,EXPLOSION_IMAGEN)
 imagenes_invasores = [partidor_de_imagenes(32,imagenes_invasores_todo_unido[i]) for i in range(len(imagenes_invasores_todo_unido))]
 imagenes_potenciadores = partidor_de_imagenes(32,imagen_potenciadores_todo_unido)
 del imagenes_potenciadores[2] #porque la verdad que no tengo idea que hace ese potenciador
@@ -144,7 +141,7 @@ def InvasionEspacial():
 	miFuenteNivel = pygame.font.Font(None,50)
 	Texto = miFuenteFin.render("Fin del juego",0,(120,100,40))
 
-	jugador = naveEspacial(explosion,resolución,disparos_jugador)
+	jugador = naveEspacial(imagenes_explosion,resolución,disparos_jugador)
 	TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 	TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 	
@@ -190,7 +187,7 @@ def InvasionEspacial():
 	
 		jugador.destruccion()
 		jugador.eliminado = True
-		listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0])
+		listaExplosiones.append(Explosion(jugador.rect.left,jugador.rect.top,sonidoExplosion,imagenes_explosion))
 		listaEnemigo = []
 		jej_temporal = False
 		TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
@@ -334,7 +331,7 @@ def InvasionEspacial():
 							#LA LÍNEA 589 HACE REFERENCIA A LO QUE VIENE A CONTINUACIÓN:
 							jugador.destruccion()
 							jugador.eliminado = True
-							listaExplosiones.append([jugador.rect.left,jugador.rect.top,time(),0]) #revisar porque no parece estar funcionando
+							listaExplosiones.append(Explosion(jugador.rect.left,jugador.rect.top,sonidoExplosion,imagenes_explosion))
 
 							enemigo.listadisparo.remove(x)
 							listaEnemigo = []
@@ -404,7 +401,7 @@ def InvasionEspacial():
 								jugador.listadisparo.remove(x) #esto parece estar dando un error de vez en cuando, hasta que descubra a que se debe este try/except debería alcanzar
 							except:
 								pass
-							listaExplosiones.append([enemigo.rect.left,enemigo.rect.top,time(),0])
+							listaExplosiones.append(Explosion(enemigo.rect.left,enemigo.rect.top,sonidoExplosion,imagenes_explosion))
 							listaEnemigo.remove(enemigo)
 							sonidoExplosion.play()
 							jugador.puntaje += 100
@@ -417,13 +414,13 @@ def InvasionEspacial():
 
 					for asteroide in listaAsteroides:
 						if x.rect.colliderect(asteroide.rect):
-							el_ast = asteroide.recibir_disparo(niv,camp_ast,lista_potenciadores,listaAsteroides,jugador.listadisparo,listaExplosiones,el_ast,imagenes_potenciadores,sonidoExplosion,sonido_potenciadores)
+							el_ast = asteroide.recibir_disparo(niv,camp_ast,lista_potenciadores,listaAsteroides,jugador.listadisparo,listaExplosiones,el_ast,imagenes_potenciadores,sonidoExplosion,sonido_potenciadores,imagenes_explosion)
 
 					if niv == niv_nod and ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()):
 						if x.rect.colliderect(nave_nodriza0):
 							#es muy similar a lo de la línea 675, separar en una función
-
-							listaExplosiones.append([x.rect.left,x.rect.top,time(),0])
+							listaExplosiones.append(Explosion(x.rect.left,x.rect.top,sonidoExplosion,imagenes_explosion))
+							
 							jugador.listadisparo.remove(x)
 							sonidoExplosion.play()
 							
@@ -434,7 +431,7 @@ def InvasionEspacial():
 							if nave_nodriza0.cant_vids <= 0:
 								
 								jugador.puntaje += 1000
-								listaExplosiones.append([nave_nodriza0.rect.left,nave_nodriza0.rect.top,time(),0])
+								listaExplosiones.append(Explosion(nave_nodriza0.rect.left,nave_nodriza0.rect.top,sonidoExplosion,imagenes_explosion))
 								del nave_nodriza0
 						if ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()) and x.rect.collidelist(nave_nodriza0.lista_orbes) != -1:
 							try:
@@ -460,16 +457,9 @@ def InvasionEspacial():
 					TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
 				lista_potenciadores.remove(each)
 				
-		tiempo_cambio_temp = 0.025
 		for each in listaExplosiones:
-			if each[3] < len(explosion)-1:
-				ventana.blit(explosion[each[3]], (each[0],each[1]))
-				if time() >= each[2]+tiempo_cambio_temp:
-					each[3] = each[3]+1 # each[3] es el índice de frame de la explosión
-					tiempo_cambio_temp += 0.025
-			else:
-				listaExplosiones.remove(each)
-		
+			each.comportamiento(tiempo,listaExplosiones)
+			each.dibujar(ventana)
 
 		ventana.blit(TextoPuntaje,(30,resolución[1]-30))
 		ventana.blit(TextoVidas,(resolución[0]-70,resolución[1]-30))
