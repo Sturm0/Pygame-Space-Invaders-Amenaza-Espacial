@@ -78,6 +78,7 @@ imagenes_asteroides = partidor_de_imagenes(32,imagen_asteroides_todo_unido)
 imagenes_nave_nodriza = partidor_de_imagenes(96,imagen_nave_nodriza_todo_unido)
 disparos_invasor = partidor_de_imagenes(7,imagen_disparos_invasor)
 #Carga de sonido
+pygame.mixer.set_num_channels(20) #porque si no hay muchos sonidos que no se escuchan
 sonido_potenciadores = pygame.mixer.Sound('./Sonidos/POWER.WAV')
 
 def detenerTodo(*args):
@@ -187,7 +188,7 @@ def InvasionEspacial():
 	
 		jugador.destruccion()
 		jugador.eliminado = True
-		listaExplosiones.append(Explosion(jugador.rect.left,jugador.rect.top,sonidoExplosion,imagenes_explosion))
+		Explosion(jugador.rect.left,jugador.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
 		listaEnemigo = []
 		jej_temporal = False
 		TextoVidas = miFuente.render("Vidas: "+str(jugador.vidas),0,(255,255,255))
@@ -331,7 +332,7 @@ def InvasionEspacial():
 							#LA LÍNEA 589 HACE REFERENCIA A LO QUE VIENE A CONTINUACIÓN:
 							jugador.destruccion()
 							jugador.eliminado = True
-							listaExplosiones.append(Explosion(jugador.rect.left,jugador.rect.top,sonidoExplosion,imagenes_explosion))
+							Explosion(jugador.rect.left,jugador.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
 
 							enemigo.listadisparo.remove(x)
 							listaEnemigo = []
@@ -401,9 +402,9 @@ def InvasionEspacial():
 								jugador.listadisparo.remove(x) #esto parece estar dando un error de vez en cuando, hasta que descubra a que se debe este try/except debería alcanzar
 							except:
 								pass
-							listaExplosiones.append(Explosion(enemigo.rect.left,enemigo.rect.top,sonidoExplosion,imagenes_explosion))
+							
+							Explosion(enemigo.rect.left,enemigo.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
 							listaEnemigo.remove(enemigo)
-							sonidoExplosion.play()
 							jugador.puntaje += 100
 							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 							tiempo2 = time()
@@ -419,10 +420,9 @@ def InvasionEspacial():
 					if niv == niv_nod and ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()):
 						if x.rect.colliderect(nave_nodriza0):
 							#es muy similar a lo de la línea 675, separar en una función
-							listaExplosiones.append(Explosion(x.rect.left,x.rect.top,sonidoExplosion,imagenes_explosion))
+							Explosion(x.rect.left,x.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
 							
 							jugador.listadisparo.remove(x)
-							sonidoExplosion.play()
 							
 							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
 							tiempo2 = time()
@@ -431,7 +431,7 @@ def InvasionEspacial():
 							if nave_nodriza0.cant_vids <= 0:
 								
 								jugador.puntaje += 1000
-								listaExplosiones.append(Explosion(nave_nodriza0.rect.left,nave_nodriza0.rect.top,sonidoExplosion,imagenes_explosion))
+								Explosion(nave_nodriza0.rect.left,nave_nodriza0.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
 								del nave_nodriza0
 						if ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()) and x.rect.collidelist(nave_nodriza0.lista_orbes) != -1:
 							try:
@@ -446,7 +446,7 @@ def InvasionEspacial():
 			each.mover()
 			each.dibujar(ventana)
 			if each.rect.colliderect(jugador):
-				pygame.mixer.Channel(1).play(each.sonido) #sin esto de channel 1 el sonido del potenciador no puede reproducirse a la vez que otros sonidos, más info en el commit
+				pygame.mixer.Channel(7).play(each.sonido) #sin esto de channel 7 el sonido del potenciador no puede reproducirse a la vez que otros sonidos, más info en el commit
 				
 				if each.tipo == 0:
 					jugador.potenciador_val = 0

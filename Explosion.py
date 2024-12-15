@@ -1,7 +1,7 @@
 import pygame
 from time import time
 class Explosion():
-	def __init__(self,left,top,sonidoExplosion,imagenes):
+	def __init__(self,left,top,sonidoExplosion,imagenes,lista_explosiones):
 		self.sonidoExplosion = sonidoExplosion
 		self.imagenes = imagenes
 		self.indice_fotograma_actual = 0
@@ -10,8 +10,8 @@ class Explosion():
 		self.rect.left = left
 		self.rect.top = top
 		self.tiempo_cambio = time()+0.025
-		
 		self.sonidoExplosion.play()
+		lista_explosiones.append(self)
 		#la idea es seguir creciendo esta clase para poner todo lo referente a explosiones que esta en main
 	def comportamiento(self,tiempo,lista_explosiones):
 		if self.indice_fotograma_actual < len(self.imagenes)-1:

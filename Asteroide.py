@@ -37,7 +37,7 @@ class Asteroide():
 			listadisparo.remove(x)
 		except:
 			pass
-		listaExplosiones.append(Explosion(self.rect.left,self.rect.top,sonidoExplosion,imagenes_explosion))
+		Explosion(self.rect.left,self.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
 
 		if niv == camp_ast:
 			el_ast += 1
