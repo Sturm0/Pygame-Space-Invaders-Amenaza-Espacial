@@ -36,3 +36,9 @@ class Orbe():
 		if self.orbe_inicio > 576:
 			self.orbe_inicio = 0
 		ventana.blit(self.orbe,self.rect)
+		
+	def recibir_disparo(self,jugador,jugador_disparo):
+		try:
+			jugador.listadisparo.remove(jugador_disparo)
+		except:
+			pass

@@ -56,3 +56,19 @@ class Nave_nodriza(Invasor):
 		self.laser.height += 4
 		pygame.draw.rect(ventana,(135,206,235),self.laser)
 		
+	def recibir_disparo(self,sonidoExplosion,imagenes_explosion,lista_explosiones,jugador,jugador_disparo,miFuente):
+		Explosion(jugador_disparo.rect.left,jugador_disparo.rect.top,sonidoExplosion,imagenes_explosion,lista_explosiones)
+		try:
+			jugador.listadisparo.remove(jugador_disparo) #esto parece estar dando un error de vez en cuando, hasta que descubra a que se debe este try/except debería alcanzar
+		except:
+			pass 
+		self.cant_vids -= 1
+		TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
+		if self.cant_vids == 0:
+			nave_nodriza0 = None
+			jugador.puntaje += 1000
+		else:
+			nave_nodriza0 = self
+		return TextoPuntaje, nave_nodriza0
+
+		

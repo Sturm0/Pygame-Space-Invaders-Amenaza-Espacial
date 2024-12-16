@@ -14,7 +14,7 @@ class naveEspacial():
 		self.rect.centerx = self.resolución[0]/2
 		self.rect.centery = self.resolución[1]-50
 		self.listadisparo = []
-		self.vidas = 5
+		self.vidas = 20
 		self.vida = True
 		self.eliminado = False
 		self.velocidad = 4
@@ -59,7 +59,6 @@ class naveEspacial():
 
 
 	def destruccion(self):
-		#self.sonidoExplosion.play()
 		self.vidas -= 1
 		if self.vidas < 1:
 			self.Vida = False

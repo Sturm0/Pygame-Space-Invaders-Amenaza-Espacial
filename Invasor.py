@@ -1,6 +1,7 @@
 import pygame
 from Proyectil import *
 from random import randint,uniform,choice
+from Explosion import *
 class Invasor():
 	def __init__(self,posx,posy,distancia, imagenes_invasores,disparos_invasor,tipo,resolución):
 		self.resolución = resolución
@@ -87,3 +88,14 @@ class Invasor():
 			self.rect.left = self.rect.left - self.velocidad
 			if self.rect.left < self.limiteIzquierda:
 				self.derecha = True
+				
+	def recibir_disparo(self, listaEnemigo,sonidoExplosion,imagenes_explosion,lista_explosiones,jugador,jugador_disparo,miFuente):
+		listaEnemigo.remove(self)
+		Explosion(self.rect.left,self.rect.top,sonidoExplosion,imagenes_explosion,lista_explosiones)
+		try:
+			jugador.listadisparo.remove(jugador_disparo) #esto parece estar dando un error de vez en cuando, hasta que descubra a que se debe este try/except debería alcanzar
+		except:
+			pass 
+		jugador.puntaje += 100
+		TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
+		return TextoPuntaje

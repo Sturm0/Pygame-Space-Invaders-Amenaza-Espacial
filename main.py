@@ -180,6 +180,7 @@ def InvasionEspacial():
 	objetivo_cambio = True #determina si se cambio o no el objetivo de lance
 	prob_poten = 40 #determina la probabilidad de que aparezca un potenciador
 	#id_objetivo = id(listaEnemigo[índiceLance])
+	nave_nodriza0 = None
 
 
 	#función para la muerte del jugador cuando lo mata la nave nodriza, la idea es después mejorarla para que incluya cualquier tipo de muerte del jugador
@@ -291,16 +292,16 @@ def InvasionEspacial():
 					
 					listaEnemigo, jej_temporal, TextoVidas, enJuego, el_ast = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,listaAsteroides,asteroide)
 
-		if "nave_nodriza0" in locals() or "nave_nodriza0" in globals():
+		if nave_nodriza0 != None:
 			nave_nodriza0.dibujar(ventana)
 			tiempo2 = nave_nodriza0.comportamiento(tiempo,tiempo2,ventana)
 			if nave_nodriza0.laser.colliderect(jugador.rect):
 				listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,None,None,nave_nodriza0)
-				del nave_nodriza0
+				nave_nodriza0 = None
 			else:
 				if jugador.rect.collidelist(nave_nodriza0.lista_orbes) > -1:
 					listaEnemigo, jej_temporal, TextoVidas, enJuego = morir_jugador(jugador,listaExplosiones,listaEnemigo,jej_temporal,TextoVidas,enJuego,None,None,nave_nodriza0)
-					del nave_nodriza0
+					nave_nodriza0 = None
 
 
 		if len(listaEnemigo) > 0 and niv != 0:
@@ -347,7 +348,7 @@ def InvasionEspacial():
 				
 		elif niv != 0:
 			# ~ transparencia = 0 #ELIMINAR ESTO UNA VEZ QUE TERMINES DE DEPURAR!
-			if (niv != camp_ast or el_ast >= 20 or jugador.eliminado) and (niv != niv_nod or ("nave_nodriza0" not in locals() and "nave_nodriza0" not in globals())):
+			if (niv != camp_ast or el_ast >= 20 or jugador.eliminado) and (niv != niv_nod or nave_nodriza0 == None):
 				tiempo_niv = time() #la hora cuando se muestra el cártel que indica que pasaste de nivel
 				if (niv == camp_ast-1 and not jugador.eliminado) or (niv == camp_ast and jugador.eliminado):
 					TextoNivel = miFuenteNivel.render("campo de ASTEROIDES",0,(255,255,255))
@@ -398,17 +399,10 @@ def InvasionEspacial():
 				else:
 					for enemigo in listaEnemigo:
 						if x.rect.colliderect(enemigo.rect):
-							try:
-								jugador.listadisparo.remove(x) #esto parece estar dando un error de vez en cuando, hasta que descubra a que se debe este try/except debería alcanzar
-							except:
-								pass
 							
-							Explosion(enemigo.rect.left,enemigo.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
-							listaEnemigo.remove(enemigo)
-							jugador.puntaje += 100
-							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
+							TextoPuntaje = enemigo.recibir_disparo(listaEnemigo,sonidoExplosion,imagenes_explosion,listaExplosiones,jugador,x,miFuente)
 							tiempo2 = time()
-
+							
 							if enemigo.seLanza and len(listaEnemigo) > 0:
 								índiceLance = randint(0,len(listaEnemigo)-1)
 								id_objetivo = id(listaEnemigo[índiceLance])
@@ -417,27 +411,12 @@ def InvasionEspacial():
 						if x.rect.colliderect(asteroide.rect):
 							el_ast = asteroide.recibir_disparo(niv,camp_ast,lista_potenciadores,listaAsteroides,jugador.listadisparo,listaExplosiones,el_ast,imagenes_potenciadores,sonidoExplosion,sonido_potenciadores,imagenes_explosion)
 
-					if niv == niv_nod and ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()):
+					if niv == niv_nod and nave_nodriza0 != None:
 						if x.rect.colliderect(nave_nodriza0):
-							#es muy similar a lo de la línea 675, separar en una función
-							Explosion(x.rect.left,x.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
-							
-							jugador.listadisparo.remove(x)
-							
-							TextoPuntaje = miFuente.render("Puntuación: "+str(jugador.puntaje),0,(255,255,255))
+							TextoPuntaje, nave_nodriza0 = nave_nodriza0.recibir_disparo(sonidoExplosion,imagenes_explosion,listaExplosiones,jugador,x,miFuente)
 							tiempo2 = time()
-							nave_nodriza0.cant_vids -= 1
-
-							if nave_nodriza0.cant_vids <= 0:
-								
-								jugador.puntaje += 1000
-								Explosion(nave_nodriza0.rect.left,nave_nodriza0.rect.top,sonidoExplosion,imagenes_explosion,listaExplosiones)
-								del nave_nodriza0
-						if ("nave_nodriza0" in locals() or "nave_nodriza0" in globals()) and x.rect.collidelist(nave_nodriza0.lista_orbes) != -1:
-							try:
-								jugador.listadisparo.remove(x)
-							except:
-								pass
+						if nave_nodriza0 != None and x.rect.collidelist(nave_nodriza0.lista_orbes) != -1:
+							nave_nodriza0.lista_orbes[x.rect.collidelist(nave_nodriza0.lista_orbes)].recibir_disparo(jugador, x)
 									
 		if not jugador.eliminado and jugador.rect.left < resolución[0]: #jugador.rect.top < resolucion[1]
 			jugador.dibujar(ventana)
