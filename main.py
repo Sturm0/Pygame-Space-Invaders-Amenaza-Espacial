@@ -11,6 +11,7 @@ from Nave_nodriza import *
 from Asteroide import *
 from Potenciadores import *
 from Explosion import *
+from pathlib import Path
 #from timeit import timeit
 #from functools import lru_cache después ver si podes integrar esto en la generación de enemigos
 #Actualmente hay dos sistemas de explosiones implementados, uno para los asteroides, nave nodriza, jugador y otro para los enemigos. Mejorar y usar el primero para todo
@@ -22,7 +23,7 @@ def limpiar_pantalla():
 limpiar_pantalla()
 resolución = (800,600)
 
-with open("Configuraciones.txt",'r') as archivo:
+with open(Path(__file__).parent/"Configuraciones.txt",'r') as archivo:
 	for each in archivo:
 		if each[0] != "#":
 			if eval(each.split("=")[1]):
@@ -40,23 +41,23 @@ explosion = []
 
 niv = 0
 #Carga de imagenes
-logo = pygame.image.load("./Imagenes/LOGO.png").convert()
+logo = pygame.image.load(Path(__file__).parent/"Imagenes/LOGO.png").convert()
 size_logo = logo.get_size()
 vent_rect = ventana.get_rect()
 logo_rect = logo.get_rect()
 logo_rect.center = vent_rect.center
 
-EXPLOSION_IMAGEN = pygame.image.load('Imagenes/EXPLODE.PNG').convert()
-imagenes_invasores_todo_unido = [pygame.image.load('Imagenes/enemigos/ENEMY.PNG').convert()
-					            ,pygame.image.load('Imagenes/enemigos/ENEMY2.PNG').convert()
-					            ,pygame.image.load('Imagenes/enemigos/ENEMY3.PNG').convert()]
+EXPLOSION_IMAGEN = pygame.image.load(Path(__file__).parent/'Imagenes/EXPLODE.PNG').convert()
+imagenes_invasores_todo_unido = [pygame.image.load(Path(__file__).parent/'Imagenes/enemigos/ENEMY.PNG').convert()
+					            ,pygame.image.load(Path(__file__).parent/'Imagenes/enemigos/ENEMY2.PNG').convert()
+					            ,pygame.image.load(Path(__file__).parent/'Imagenes/enemigos/ENEMY3.PNG').convert()]
 					 
-imagen_potenciadores_todo_unido = pygame.image.load('./Imagenes/POWERUPS.PNG').convert()
-imagen_asteroides_todo_unido = pygame.image.load('Imagenes/ASTEROIDS.PNG').convert()
-imagen_nave_nodriza_todo_unido = pygame.image.load('Imagenes/enemigos/BOSS.PNG').convert()
+imagen_potenciadores_todo_unido = pygame.image.load(Path(__file__).parent/'Imagenes/POWERUPS.PNG').convert()
+imagen_asteroides_todo_unido = pygame.image.load(Path(__file__).parent/'Imagenes/ASTEROIDS.PNG').convert()
+imagen_nave_nodriza_todo_unido = pygame.image.load(Path(__file__).parent/'Imagenes/enemigos/BOSS.PNG').convert()
 
-imagen_disparos_invasor = pygame.image.load('Imagenes/enemigos/ESHOTS.PNG').convert()
-disparos_jugador = [pygame.image.load(each).convert() for each in ["Imagenes/SHOTS.png","Imagenes/SHOTS2.png","Imagenes/SHOTS3.png"]]
+imagen_disparos_invasor = pygame.image.load(Path(__file__).parent/'Imagenes/enemigos/ESHOTS.PNG').convert()
+disparos_jugador = [pygame.image.load(each).convert() for each in [Path(__file__).parent/"Imagenes/SHOTS.png",Path(__file__).parent/"Imagenes/SHOTS2.png",Path(__file__).parent/"Imagenes/SHOTS3.png"]]
 
 def partidor_de_imagenes(ancho_de_sprite,imagen):
 	#esta función es para obtener cada uno de los sprites de por ejemplo la tira de sprites que es ASTEROIDS.PNG
@@ -79,7 +80,7 @@ imagenes_nave_nodriza = partidor_de_imagenes(96,imagen_nave_nodriza_todo_unido)
 disparos_invasor = partidor_de_imagenes(7,imagen_disparos_invasor)
 #Carga de sonido
 pygame.mixer.set_num_channels(20) #porque si no hay muchos sonidos que no se escuchan
-sonido_potenciadores = pygame.mixer.Sound('./Sonidos/POWER.WAV')
+sonido_potenciadores = pygame.mixer.Sound(Path(__file__).parent/'Sonidos/POWER.WAV')
 
 def detenerTodo(*args):
 	for enemigo in listaEnemigo:
@@ -127,13 +128,13 @@ def InvasionEspacial():
 	tiempo2 = None
 	música = []
 	for número in range(1,5):
-		música.append("./Sonidos/TRACK%s.ogg"%número)
+		música.append(Path(__file__).parent/("Sonidos/TRACK%s.ogg"%número))
 	musc_index = 0 #índice de la pista de música
 	sonido = pygame.mixer.Sound(música[musc_index])
-	sonidoExplosion = pygame.mixer.Sound('./Sonidos/EXPLODE.WAV')
+	sonidoExplosion = pygame.mixer.Sound(Path(__file__).parent/'Sonidos/EXPLODE.WAV')
 	
 	sonido.play()
-	gameover = pygame.image.load('./Imagenes/gameover.bmp').convert()
+	gameover = pygame.image.load(Path(__file__).parent/'Imagenes/gameover.bmp').convert()
 	gameover = pygame.transform.scale(gameover,(resolución[0],resolución[1]))
 
 	#Fuentes

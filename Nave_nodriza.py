@@ -2,6 +2,7 @@ import pygame
 from Invasor import *
 from time import  time
 from Orbe import *
+from pathlib import Path
 class Nave_nodriza(Invasor):
 	def __init__(self,posx,posy,resolución,lista_imagenes):
 		super().__init__(posx,posy,7000,[lista_imagenes],[7000],0,resolución) #el 7000 no debería tener ningún efecto, el [7000] tampoco debería afectar porque total no uso los disparos del invasor padre en ningún lado acá
@@ -13,7 +14,7 @@ class Nave_nodriza(Invasor):
 		self.laser = pygame.Rect(self.rect.midbottom[0],self.rect.midbottom[1],8,self.resolución[1]/3)
 		self.tiempo_rayo = 0
 		self.lista_orbes = []
-		self.sonido_laser = pygame.mixer.Sound('./Sonidos/LASER.WAV')
+		self.sonido_laser = pygame.mixer.Sound(Path(__file__).parent/'Sonidos/LASER.WAV')
 		
 	def comportamiento(self, tiempo,tiempo2, ventana):
 		self.movimientoLateral()

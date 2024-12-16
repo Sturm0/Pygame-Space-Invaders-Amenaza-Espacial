@@ -1,26 +1,27 @@
 import pygame
 from Proyectil import *
 from pygame.locals import *
+from pathlib import Path
 class naveEspacial():
 	#clase para las naves
 	def __init__(self,explosion,resolución,disparos_jugador,asignaciones=[K_UP,K_DOWN,K_RIGHT,K_LEFT,K_SPACE]):
 
 		pygame.sprite.Sprite.__init__(self)
 		self.resolución = resolución
-		self.ImagenNave = pygame.image.load('./Imagenes/SHIP.png').convert()
+		self.ImagenNave = pygame.image.load(Path(__file__).parent/'Imagenes/SHIP.png').convert()
 		self.ImagenExplosion = explosion[0]
 		#self.sonidoExplosion = pygame.mixer.Sound()
 		self.rect = self.ImagenNave.get_rect()
 		self.rect.centerx = self.resolución[0]/2
 		self.rect.centery = self.resolución[1]-50
 		self.listadisparo = []
-		self.vidas = 20
+		self.vidas = 4
 		self.vida = True
 		self.eliminado = False
 		self.velocidad = 4
 		self.puntaje = 0
-		self.sonidoDisparo = pygame.mixer.Sound('./Sonidos/SHOT1.WAV')
-		self.sonido_laser = pygame.mixer.Sound('./Sonidos/LASER.WAV')
+		self.sonidoDisparo = pygame.mixer.Sound(Path(__file__).parent/'Sonidos/SHOT1.WAV')
+		self.sonido_laser = pygame.mixer.Sound(Path(__file__).parent/'Sonidos/LASER.WAV')
 		self.asignaciones = asignaciones
 		self.acumulador = 0
 		self.potenciador_val = -1
@@ -67,7 +68,7 @@ class naveEspacial():
 
 	def revivir(self):
 		self.velocidad = 5
-		self.ImagenNave = pygame.image.load('./Imagenes/SHIP.png').convert()
+		self.ImagenNave = pygame.image.load(Path(__file__).parent/'Imagenes/SHIP.png').convert()
 		self.rect.centerx = self.resolución[0]/2
 		self.rect.centery = self.resolución[1]-50
 

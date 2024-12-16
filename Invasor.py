@@ -2,11 +2,12 @@ import pygame
 from Proyectil import *
 from random import randint,uniform,choice
 from Explosion import *
+from pathlib import Path
 class Invasor():
 	def __init__(self,posx,posy,distancia, imagenes_invasores,disparos_invasor,tipo,resolución):
 		self.resolución = resolución
 		self.listaimagenes = imagenes_invasores[tipo]
-		self.sonido_disparo = pygame.mixer.Sound('./Sonidos/DIVE.ogg')
+		self.sonido_disparo = pygame.mixer.Sound(Path(__file__).parent/'Sonidos/DIVE.ogg')
 		self.imagen_disparo = disparos_invasor[tipo]
 
 		if tipo == 0:
