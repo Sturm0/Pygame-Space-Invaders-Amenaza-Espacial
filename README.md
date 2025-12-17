@@ -11,3 +11,5 @@ Flechas direccionales para moverse
 Mantener presionada la barra espaceadora para disparar
 
 Esc para cerrar el programa
+
+![una captura del juego](captura.png)
